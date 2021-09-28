@@ -2,7 +2,6 @@
 	This is a file for the Sentiment Analysis algorithm
 """
 
-import pandas as pd
 import nltk
 from nltk.stem import WordNetLemmatizer
 
@@ -35,12 +34,12 @@ class SentimentAnalysis():
 		pass
 
 	# preprocesses text data
-	def preprocess_data():
+	def preprocess_data(self):
 		stop_words = open('./DataSets/stopwords.txt', "r")
 		lemmatizer = WordNetLemmatizer() 
 
-	# trains the model using the training data
-	def train_model():
+	# trains the model using the training data tupels
+	def train_model(self, training_data):
 		pass
 
 	
@@ -50,28 +49,17 @@ if __name__ == '__main__':
 
 	sa = SentimentAnalysis()
 
-	# training.csv has data in the order of [id, label, tweet]
-	# data_tuple_pairs("./DataSets/train.csv", True)
+	# read data for training the model
+	data_tuple_pairs("./DataSets/train.csv", True)
 
+	#TODO: do stuff for training model here
+
+	# read data for testing the model
 	data_tuple_pairs("./DataSets/test.csv", False)
 
-	# training_data = pd.read_csv("./DataSets/train.csv")
+	#TODO: do stuff for testing accuracy of model here
 
-	# # for testing - only test with 500 rows of dataset for now
 
-	# print(training_data.head())
-
-	# count = 0
-	# for idx, row in training_data.iterrows():
-	# 	if count < 3:
-	# 		print()
-	# 		print(row[idx])
-	# 		print()
-
-	# 		count += 1
-
-	# print("----------")
-	# print(training_data.info())
 
 	# run sa once with 1-grams
 	# calculate accuracy
