@@ -4,6 +4,13 @@
 
 import nltk
 from nltk.stem import WordNetLemmatizer
+import re
+
+
+
+"""
+TODO:	
+"""
 
 
 # returns a list of tuples, each of which is formated as (id, example_text) for test data and (id, label, example_text) for training data
@@ -33,16 +40,47 @@ class SentimentAnalysis():
 	def __init__(self):
 		pass
 
-	# preprocesses text data
-	def preprocess_data(self):
-		stop_words = open('./DataSets/stopwords.txt', "r")
-		lemmatizer = WordNetLemmatizer() 
+	# preprocesses text data - text is the sentences from the data
+	def preprocess_data(self, text):
 
-	# trains the model using the training data tupels
+		stopwords_data = open('./DataSets/stopwords.txt', "r")
+
+		# put all stopwords in lower case and remove new line characters
+		stop_words = []
+		for word in stopwords_data:
+			word = word.lower()
+			if "\n" in word:
+				word = word.strip()
+			stop_words.append(word)
+
+		lemmatizer = WordNetLemmatizer()
+		text = text.lower()
+		text = ''.join([i for i in text if i.isalpha() or i.isspace()])
+		word_list = text.split()
+
+		# removes any residual non-English characters that weren't removed already
+		cleaned_list = []
+		for word in word_list:
+			new_word = re.sub("[^a-zA-Z0-9]+", "",word)
+			if new_word != '':
+				cleaned_list.append(new_word)
+
+		for_return = []
+		for word in cleaned_list:
+			if word not in stop_words:
+				word = lemmatizer.lemmatize(word)
+				for_return.append(word)
+
+		return for_return
+
+	# trains the model using the training data tupels: (id, label, text_data) 
 	def train_model(self, training_data):
+
+		# go through each tuple,
+			# send each training_data[2] to preprocess_data()
+			# replace original training_data text_data with the new processed sentence returned from preprocess_data 
 		pass
 
-	
 
 
 if __name__ == '__main__':
@@ -50,7 +88,15 @@ if __name__ == '__main__':
 	sa = SentimentAnalysis()
 
 	# read data for training the model
-	data_tuple_pairs("./DataSets/train.csv", True)
+	training_tuples = data_tuple_pairs("./DataSets/train.csv", True)
+	#print(training_tuples)
+
+	count = 0
+	for tuple_data in training_tuples:
+		if count != 125:
+			sa.preprocess_data(tuple_data[2])
+			count += 1
+
 
 	#TODO: do stuff for training model here
 
