@@ -9,7 +9,9 @@ import re
 
 
 """
-TODO:	
+TODO:	test score function
+		complete preprocess_data function
+		complete train_model function
 """
 
 
@@ -38,12 +40,17 @@ def data_tuple_pairs(file_path, is_training):
 class SentimentAnalysis():
 
 	def __init__(self):
+		self.trained_prob_pos = 0		# probability of negative classificaiton from training
+		self.trained_prob_neg = 0		# probability of positive classification from training
 		pass
+		
 
 	# preprocesses text data - text is the sentences from the data
 	def preprocess_data(self, text):
 
 		stopwords_data = open('./DataSets/stopwords.txt', "r")
+
+		# TODO: ---> must separate words: dont --> do not
 
 		# put all stopwords in lower case and remove new line characters
 		stop_words = []
@@ -76,10 +83,48 @@ class SentimentAnalysis():
 	# trains the model using the training data tupels: (id, label, text_data) 
 	def train_model(self, training_data):
 
-		# go through each tuple,
-			# send each training_data[2] to preprocess_data()
-			# replace original training_data text_data with the new processed sentence returned from preprocess_data 
-		pass
+		count = 0
+		for data in training_data:
+			if count < 15:
+				print("--> ", data[2])
+				preprocessed_sentence = preprocess_data(data[2])
+				print("----> ", preprocessed_sentence)
+				count += 1
+				# replace original training_data text_data with the new processed sentence returned from preprocess_data 
+
+
+		return
+
+	# calculates the probability of a given piece of data to be classified as either positive or negative
+	def score(self, data):
+
+		i_d = data[0]
+		text = data[2]
+
+		# create an instance of the text for both a negative and positive classification
+		pos_classification = (i_d, 1, text)
+		neg_classification = (i_d, 0, text)
+
+		# for both classifications, collect features of words within text 
+		pos_features = self.featurize(pos_classification)
+		neg_features = self.featurize(neg_classification)
+
+		# calclulate probability of each feature being positive or negative
+		prob_positive = self.trained_prob_pos
+		for feature in pos_features:
+			if f[0] in self.pos_features:
+				word_prob = self.pos_features[f[0]]
+				prob_positive *= word_prob
+
+		prob_negative = self.trained_prob_neg
+		for feature in neg_features:
+			if f[0] in self.neg_features:
+				word_prob = self.neg_features[f[0]]
+				prob_negative *= word_prob
+
+    	return (prob_positive, prob_negative)
+
+    
 
 
 
@@ -91,12 +136,7 @@ if __name__ == '__main__':
 	training_tuples = data_tuple_pairs("./DataSets/train.csv", True)
 	#print(training_tuples)
 
-	count = 0
-	for tuple_data in training_tuples:
-		if count != 125:
-			sa.preprocess_data(tuple_data[2])
-			count += 1
-
+	sa.train_model(training_tuples)
 
 	#TODO: do stuff for training model here
 
