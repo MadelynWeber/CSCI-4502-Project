@@ -5,6 +5,7 @@
 import nltk
 from nltk.stem import WordNetLemmatizer
 import re
+from contractions import contractions_dict # contains a mapping of frequent contractions in English and their expanded forms
 
 
 
@@ -45,12 +46,18 @@ class SentimentAnalysis():
 		pass
 		
 
+	# expands contractions for more accurate classification (ie. dont --> do not)
+	def expand_contractions(self, contraction):
+		# look through mappings of contractions
+		# if contraction matches a mapping, return its key
+		pass
+
+
 	# preprocesses text data - text is the sentences from the data
 	def preprocess_data(self, text):
 
 		stopwords_data = open('./DataSets/stopwords.txt', "r")
-
-		# TODO: ---> must separate words: dont --> do not
+		lemmatizer = WordNetLemmatizer()
 
 		# put all stopwords in lower case and remove new line characters
 		stop_words = []
@@ -60,10 +67,11 @@ class SentimentAnalysis():
 				word = word.strip()
 			stop_words.append(word)
 
-		lemmatizer = WordNetLemmatizer()
 		text = text.lower()
+
 		text = ''.join([i for i in text if i.isalpha() or i.isspace()])
 		word_list = text.split()
+
 
 		# removes any residual non-English characters that weren't removed already
 		cleaned_list = []
@@ -72,13 +80,25 @@ class SentimentAnalysis():
 			if new_word != '':
 				cleaned_list.append(new_word)
 
-		for_return = []
+		new_cleaned_list = []
 		for word in cleaned_list:
+			expansion = []
+			if word in contractions_dict:
+				word = contractions_dict[word]
+				new_words = word.split()
+				for idx, item in enumerate(new_words):
+					new_cleaned_list.append(item)
+			else:
+				new_cleaned_list.append(word)
+
+		for_return = []
+		for word in new_cleaned_list:
 			if word not in stop_words:
 				word = lemmatizer.lemmatize(word)
 				for_return.append(word)
 
 		return for_return
+
 
 	# trains the model using the training data tupels: (id, label, text_data) 
 	def train_model(self, training_data):
@@ -87,7 +107,7 @@ class SentimentAnalysis():
 		for data in training_data:
 			if count < 15:
 				print("--> ", data[2])
-				preprocessed_sentence = preprocess_data(data[2])
+				preprocessed_sentence = self.preprocess_data(data[2])
 				print("----> ", preprocessed_sentence)
 				count += 1
 				# replace original training_data text_data with the new processed sentence returned from preprocess_data 
@@ -122,9 +142,8 @@ class SentimentAnalysis():
 				word_prob = self.neg_features[f[0]]
 				prob_negative *= word_prob
 
-    	return (prob_positive, prob_negative)
+		return (prob_positive, prob_negative)
 
-    
 
 
 
