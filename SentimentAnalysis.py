@@ -24,15 +24,20 @@ def data_tuple_pairs(file_path, is_training):
 	hold_returns = []
 
 	for l in lines:
-		separate_elements = l.split(',')
-		i_d = separate_elements[0]
+		separate_elements = l.split('\t')
+		#print(separate_elements)
+		#i_d = separate_elements[0]
 		if (is_training):
 			label = separate_elements[1]
-			text = separate_elements[2]
-			hold_returns.append(tuple((i_d, label, text)))
+			if "\n" in label:
+				label = label.strip()
+			text = separate_elements[0]
+			#hold_returns.append(tuple((i_d, label, text)))
+			hold_returns.append(tuple((text, label)))
 		else:
-			text = separate_elements[1]
-			hold_returns.append(tuple((i_d, text)))
+			text = separate_elements[0]
+			hold_returns.append(text)
+			#hold_returns.append(tuple((i_d, text)))
 
 	# the first line is just the tag names, so remove it
 	return (hold_returns[1:])
@@ -43,6 +48,8 @@ class SentimentAnalysis():
 	def __init__(self):
 		self.trained_prob_pos = 0		# probability of negative classificaiton from training
 		self.trained_prob_neg = 0		# probability of positive classification from training
+		self.class_positive_count = 0	# count of all positive instances from training
+		self.class_negative_count = 0	# count of all negative instances from training
 		pass
 		
 
@@ -72,7 +79,6 @@ class SentimentAnalysis():
 		text = ''.join([i for i in text if i.isalpha() or i.isspace()])
 		word_list = text.split()
 
-
 		# removes any residual non-English characters that weren't removed already
 		cleaned_list = []
 		for word in word_list:
@@ -100,17 +106,129 @@ class SentimentAnalysis():
 		return for_return
 
 
-	# trains the model using the training data tupels: (id, label, text_data) 
+	# trains the model using the training data tupels: (text_data, label) 
 	def train_model(self, training_data):
+
+		print("\n---------------------------------------")
+		print("------------- IN TRAINING -----------------")
+
+		new_training_data = []
 
 		count = 0
 		for data in training_data:
+			# if count < 15:
+			# print("==================================")
+			# print("--> OLD DATA: ", data[0])
+			preprocessed_sentence = self.preprocess_data(data[0])
+			# print("----> ", preprocessed_sentence)
+			count += 1
+			# replace original training_data text_data with the new processed sentence returned from preprocess_data 
+			# print("---> NEW DATA: ", data[0])
+			# print("=====> ", preprocessed_sentence)
+			#new_training_data.append(' '.join(preprocessed_sentence))
+
+			# new_training_data = [i for lst in new_training_data for i in lst]
+
+			#print(new_training_data)
+
+
+			new_training_data.append((' '.join(preprocessed_sentence), data[1]))
+		print()
+		#print(new_training_data)
+
+		count = 0
+		for item in new_training_data: # new_training_data is of format: (text, label)
 			if count < 15:
-				print("--> ", data[2])
-				preprocessed_sentence = self.preprocess_data(data[2])
-				print("----> ", preprocessed_sentence)
+				# handles positive features
+				if item[1] == '1':
+					self.class_positive_count += 1
+					pass
+
+
+				# handles negative features
+				if item[1] == '0':
+					self.class_negative_count += 1
+					pass
+
 				count += 1
-				# replace original training_data text_data with the new processed sentence returned from preprocess_data 
+	# print("positive: ", self.class_positive_count)
+	# print("negative: ", self.class_negative_count)
+
+
+
+
+        
+#         for f in features:
+#             # if positive
+#             if f[1] == "1":
+#                 self.pos += 1
+#                 if f[0] not in self.pos_count:
+#                     self.pos_count[f[0]] = 1
+#                 else:
+#                     self.pos_count[f[0]] += 1  
+#             # if negative
+#             elif f[1] == "0":
+#                 self.neg += 1
+#                 if f[0] not in self.neg_count:
+#                     self.neg_count[f[0]] = 1
+#                 else:
+#                     self.neg_count[f[0]] += 1
+            
+#         # handle situation when word occurs in one class, but not in the other --> normalizing dictionary
+#         for key, val in self.pos_count.items():
+#             if key not in self.neg_count:
+#                 self.neg_count[key] = 0
+
+#         for key, val in self.neg_count.items():
+#             if key not in self.pos_count:
+#                 self.pos_count[key] = 0
+                    
+#         # get a total vocab
+#         for word in self.pos_count:
+#             if word not in self.total_vocab:
+#                 self.total_vocab[word] = 1
+#             else:
+#                 self.total_vocab[word] += 1
+#         for word in self.neg_count:
+#             if word not in self.total_vocab:
+#                 self.total_vocab[word] = 1
+#             else:
+#                 self.total_vocab[word] += 1
+                
+#         vals = self.total_vocab.values()
+#         total_vocab_words = sum(vals)
+        
+#         #get prob of each word in pos class
+#         for word in self.pos_count:
+#             prob = self.pos_count[word] / self.pos
+            
+#             if prob == 0:
+#                 # do laplace smoothing
+#                 prob = (self.pos_count[word] + 1) / (self.pos + total_vocab_words)
+
+#             self.positive_probs[word] = prob
+        
+#         #get prob of each word in neg class
+#         for word in self.neg_count:
+#             prob = self.neg_count[word] / self.neg
+            
+#             if prob == 0:
+#                 # do laplace smoothing
+#                 prob = (self.neg_count[word] + 1) / (self.neg + total_vocab_words)
+                
+#             self.negative_probs[word] = prob
+
+
+#         self.pos_class_prob = self.pos / (self.pos + self.neg)
+#         self.neg_class_prob = self.neg / (self.pos + self.neg)
+        
+#         print("positive class prob is: ", self.pos_class_prob)
+#         print("negative class prob is: ", self.neg_class_prob)
+
+            
+#         print("Training finished.")
+
+
 
 
 		return
@@ -152,7 +270,7 @@ if __name__ == '__main__':
 	sa = SentimentAnalysis()
 
 	# read data for training the model
-	training_tuples = data_tuple_pairs("./DataSets/train.csv", True)
+	training_tuples = data_tuple_pairs("./DataSets/amazon_cells_labelled.txt", True)  #("./DataSets/train.csv", True)
 	#print(training_tuples)
 
 	sa.train_model(training_tuples)
