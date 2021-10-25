@@ -136,29 +136,8 @@ class SentimentAnalysis():
 		print()
 		#print(new_training_data)
 
-		count = 0
-		for item in new_training_data: # new_training_data is of format: (text, label)
-			if count < 15:
-				# handles positive features
-				if item[1] == '1':
-					self.class_positive_count += 1
-					pass
 
-
-				# handles negative features
-				if item[1] == '0':
-					self.class_negative_count += 1
-					pass
-
-				count += 1
-	# print("positive: ", self.class_positive_count)
-	# print("negative: ", self.class_negative_count)
-
-
-
-
-        
-#         for f in features:
+		#         for f in features:
 #             # if positive
 #             if f[1] == "1":
 #                 self.pos += 1
@@ -173,15 +152,41 @@ class SentimentAnalysis():
 #                     self.neg_count[f[0]] = 1
 #                 else:
 #                     self.neg_count[f[0]] += 1
-            
-#         # handle situation when word occurs in one class, but not in the other --> normalizing dictionary
-#         for key, val in self.pos_count.items():
+
+		count = 0
+		for item in new_training_data: # new_training_data is of format: (text, label)
+			if count < 15:
+				print()
+				# handles positive features
+				if item[1] == '1':
+					self.class_positive_count += 1
+					# print("TO FEATURIZE POSITIVE: ", item[0])
+					self.featurize(item)
+					pass
+
+
+				# handles negative features
+				if item[1] == '0':
+					self.class_negative_count += 1
+					# print("TO FEATURIZE NEGATIVE: ", item[0])
+					self.featurize(item)
+					pass
+
+				count += 1
+	# print("positive: ", self.class_positive_count)
+	# print("negative: ", self.class_negative_count)
+
+		# normalize dictinaory --> handles occurances of word appearing in one class, but not the other, which would give a zero-count for the word 
+
+		#         for key, val in self.pos_count.items():
 #             if key not in self.neg_count:
 #                 self.neg_count[key] = 0
 
 #         for key, val in self.neg_count.items():
 #             if key not in self.pos_count:
 #                 self.pos_count[key] = 0
+
+
                     
 #         # get a total vocab
 #         for word in self.pos_count:
@@ -232,6 +237,22 @@ class SentimentAnalysis():
 
 
 		return
+
+	# takes a given sentence with its label and splits it into individual words which hold an association to the sentence's given classificaiton label
+	# data is of format: (text, label)
+	def featurize(self, data):
+
+		sentence = data[0]
+		label = data[1]
+
+		sentence = sentence.split()
+
+		features = []
+		for word in sentence:
+			features.append((word, label))
+
+		return features
+
 
 	# calculates the probability of a given piece of data to be classified as either positive or negative
 	def score(self, data):
@@ -403,103 +424,7 @@ if __name__ == '__main__':
 #         self.negative_probs = {} # negative probabilities
 #         self.total_vocab = {} # dictionary to hold total vocab
 
-#     def train(self, examples): # try normalization if score does not improve
-        
-#         features = []
-#         # implement pre-processing
-#         for e in examples:
-            
-#             # make sentence in the lower case
-#             sentence = e[1]
-#             sentence = sentence.lower()
-            
-#             # remove all non-alphanumeric values from string
-#             sentence = ''.join([i for i in sentence if i.isalpha() or i.isspace()])
-            
-#             # remove all stop words and lemmatize words
-#             hold_words = []
-#             processed_sentence = []
-#             hold_words.append(sentence.split())
-#             for sentence in hold_words:
-#                 for word in sentence:
-#                     if word not in stop_words:
-#                         word_new = lemmatizer.lemmatize(word)
-#                         processed_sentence.append(word_new)
-            
-#             sentence = ' '.join(processed_sentence)            
-#             features.append(self.featurize((e[0], sentence, e[2])))
-        
-#         features = [i for lst in features for i in lst]
-        
-#         for f in features:
-#             # if positive
-#             if f[1] == "1":
-#                 self.pos += 1
-#                 if f[0] not in self.pos_count:
-#                     self.pos_count[f[0]] = 1
-#                 else:
-#                     self.pos_count[f[0]] += 1  
-#             # if negative
-#             elif f[1] == "0":
-#                 self.neg += 1
-#                 if f[0] not in self.neg_count:
-#                     self.neg_count[f[0]] = 1
-#                 else:
-#                     self.neg_count[f[0]] += 1
-            
-#         # handle situation when word occurs in one class, but not in the other --> normalizing dictionary
-#         for key, val in self.pos_count.items():
-#             if key not in self.neg_count:
-#                 self.neg_count[key] = 0
 
-#         for key, val in self.neg_count.items():
-#             if key not in self.pos_count:
-#                 self.pos_count[key] = 0
-                    
-#         # get a total vocab
-#         for word in self.pos_count:
-#             if word not in self.total_vocab:
-#                 self.total_vocab[word] = 1
-#             else:
-#                 self.total_vocab[word] += 1
-#         for word in self.neg_count:
-#             if word not in self.total_vocab:
-#                 self.total_vocab[word] = 1
-#             else:
-#                 self.total_vocab[word] += 1
-                
-#         vals = self.total_vocab.values()
-#         total_vocab_words = sum(vals)
-        
-#         #get prob of each word in pos class
-#         for word in self.pos_count:
-#             prob = self.pos_count[word] / self.pos
-            
-#             if prob == 0:
-#                 # do laplace smoothing
-#                 prob = (self.pos_count[word] + 1) / (self.pos + total_vocab_words)
-
-#             self.positive_probs[word] = prob
-        
-#         #get prob of each word in neg class
-#         for word in self.neg_count:
-#             prob = self.neg_count[word] / self.neg
-            
-#             if prob == 0:
-#                 # do laplace smoothing
-#                 prob = (self.neg_count[word] + 1) / (self.neg + total_vocab_words)
-                
-#             self.negative_probs[word] = prob
-
-
-#         self.pos_class_prob = self.pos / (self.pos + self.neg)
-#         self.neg_class_prob = self.neg / (self.pos + self.neg)
-        
-#         print("positive class prob is: ", self.pos_class_prob)
-#         print("negative class prob is: ", self.neg_class_prob)
-
-            
-#         print("Training finished.")
 
 #     def score(self, data):
 #         i_d = data[0]
@@ -535,16 +460,6 @@ if __name__ == '__main__':
 #         else:
 #             return 0 # is negative
 
-#     def featurize(self, data):
-#         sentence = data[1]
-#         label = data[2]
-        
-#         sentence = sentence.split()
-#         feat = []
-#         for s in sentence:
-#             feat.append((s, label))
-            
-#         return feat
 
 #     def __str__(self):
 #         return "NAME FOR YOUR CLASSIFIER HERE"
