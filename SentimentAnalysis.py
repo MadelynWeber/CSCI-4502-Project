@@ -50,6 +50,8 @@ class SentimentAnalysis():
 		self.trained_prob_neg = 0		# probability of positive classification from training
 		self.class_positive_count = 0	# count of all positive instances from training
 		self.class_negative_count = 0	# count of all negative instances from training
+		self.positive_words = 0		# holds total occurances of words in positive classification
+		self.negative_words = 0		# holds total occurances of words in negative classificaiton
 		pass
 		
 
@@ -161,7 +163,16 @@ class SentimentAnalysis():
 				if item[1] == '1':
 					self.class_positive_count += 1
 					# print("TO FEATURIZE POSITIVE: ", item[0])
-					self.featurize(item)
+					features = self.featurize(item)
+
+					for f in features:
+						print("pos features: ", f)
+						# if word not in dictionary:
+							# add to dict with count 1 --> self.positive_words
+						# else:
+							# increase count +1 for each occurance
+						pass
+
 					pass
 
 
@@ -169,12 +180,36 @@ class SentimentAnalysis():
 				if item[1] == '0':
 					self.class_negative_count += 1
 					# print("TO FEATURIZE NEGATIVE: ", item[0])
-					self.featurize(item)
+					features = self.featurize(item)
+
+					for f in features:
+						print("neg features: ", f)
+						# if word not in dictionary:
+							# add to dict with count 1 --> self.negative_words
+						# else:
+							# increase count +1 for each occurance
+						pass
+
 					pass
 
 				count += 1
 	# print("positive: ", self.class_positive_count)
 	# print("negative: ", self.class_negative_count)
+
+
+	# normalize positive dict
+	# for key, val in self.positive_words:
+	# 	pass
+
+	# # normalize negative dict
+	# for key, val in self.negative_words:
+	# 	pass
+
+
+
+
+
+
 
 		# normalize dictinaory --> handles occurances of word appearing in one class, but not the other, which would give a zero-count for the word 
 
