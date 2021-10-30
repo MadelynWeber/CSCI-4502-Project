@@ -10,67 +10,54 @@ from contractions import contractions_dict # contains a mapping of frequent cont
 # returns the calculated precision for the classification
 def precision(gold_labels, classified_labels):
 
-	#     values = get_pos_neg(gold_labels, classified_labels) 
-#     true_pos = values[0]
-#     false_pos = values[3]
-#     precision = true_pos / (true_pos + false_pos)
-    
-#     print("Precision is: ", precision)
-#     print()
-#     return precision # returns as a float
+	values = calculate_pos_neg(gold_labels, classified_labels)
+	true_pos = values[0]
+	false_pos = values[3]
+	precision = true_pos / (true_pos + false_pos)
 
-	pass
+	return precision
 
 # returns the calculated recall for the classification
 def recall(gold_labels, classified_labels):
-	
-#     values = get_pos_neg(gold_labels, classified_labels)
-#     true_pos = values[0]
-#     false_neg = values[2]
-#     recall = true_pos / (true_pos + false_neg)
-    
-#     print("Recall is: ", recall)
-#     return recall # returns as a float
 
-	pass
+	values = calculate_pos_neg(gold_labels, classified_labels)
+	true_pos = values[0]
+	false_neg = values[2]
+	recall = true_pos / (true_pos + false_neg)
+
+	return recall
 
 # returns the true and false positive and negative values from the classificaiton
 def calculate_pos_neg(gold_labels, predicted_labels):
-	
-#     true_pos = 0
-#     true_neg = 0
-#     false_neg = 0
-#     false_pos = 0
-    
-#     idx = 0
-#     while idx < len(predicted_labels):
 
-#         if predicted_labels[idx] == 1 and gold_labels[idx] == 1:
-#             true_pos += 1
-#         elif predicted_labels[idx] == 0 and gold_labels[idx] == 0:
-#             true_neg += 1
-#         elif predicted_labels[idx] == 1 and gold_labels[idx] == 0:
-#             false_pos += 1
-#         elif predicted_labels[idx] == 0 and gold_labels[idx] == 1:
-#              false_neg += 1
+	true_pos = 0
+	true_neg = 0
+	false_neg = 0
+	false_pos = 0
 
-#         idx += 1
+	idx = 0
+	while idx < len(predicted_labels):
+		if predicted_labels[idx] == 1 and gold_labels[idx] == 1:
+			true_pos += 1
+		elif predicted_labels[idx] == 0 and gold_labels[idx] == 0:
+			true_neg += 1
+		elif predicted_labels[idx] == 1 and gold_labels[idx] == 0:
+			false_pos += 1
+		elif predicted_labels[idx] == 0 and gold_labels[idx] == 1:
+			false_neg += 1
+		idx += 1
 
-#     return (true_pos, true_neg, false_neg, false_pos)
-
-	pass
+	return(true_pos, true_neg, false_neg, false_pos)
 
 # returns the calculated F1-score for the classification
 def calculate_f1(gold_labels, classified_labels):
 
-	#     values = get_pos_neg(gold_labels, classified_labels)
-#     recall_val = recall(gold_labels, classified_labels)
-#     precision_val = precision(gold_labels, classified_labels)
-#     f1 = (2*precision_val*recall_val) / (recall_val + precision_val)
-    
-#     return f1 # returns as a float
+	values = calculate_pos_neg(gold_labels, classified_labels)
+	recall_val = recall(gold_labels, classified_labels)
+	precision_val = precision(gold_labels, classified_labels)
+	f1 = (2*precision_val*recall_val) / (recall_val + precision_val)
 
-	pass
+	return f1
 
 # returns a list of tuples, each of which is formated as (id, example_text) for test data and (id, label, example_text) for training data
 def data_tuple_pairs(file_path, is_training):
