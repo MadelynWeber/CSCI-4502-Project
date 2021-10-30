@@ -7,14 +7,70 @@ from nltk.stem import WordNetLemmatizer
 import re
 from contractions import contractions_dict # contains a mapping of frequent contractions in English and their expanded forms
 
+# returns the calculated precision for the classification
+def precision(gold_labels, classified_labels):
 
+	#     values = get_pos_neg(gold_labels, classified_labels) 
+#     true_pos = values[0]
+#     false_pos = values[3]
+#     precision = true_pos / (true_pos + false_pos)
+    
+#     print("Precision is: ", precision)
+#     print()
+#     return precision # returns as a float
 
-"""
-TODO:	test score function
-		complete preprocess_data function
-		complete train_model function
-"""
+	pass
 
+# returns the calculated recall for the classification
+def recall(gold_labels, classified_labels):
+	
+#     values = get_pos_neg(gold_labels, classified_labels)
+#     true_pos = values[0]
+#     false_neg = values[2]
+#     recall = true_pos / (true_pos + false_neg)
+    
+#     print("Recall is: ", recall)
+#     return recall # returns as a float
+
+	pass
+
+# returns the true and false positive and negative values from the classificaiton
+def calculate_pos_neg(gold_labels, predicted_labels):
+	
+#     true_pos = 0
+#     true_neg = 0
+#     false_neg = 0
+#     false_pos = 0
+    
+#     idx = 0
+#     while idx < len(predicted_labels):
+
+#         if predicted_labels[idx] == 1 and gold_labels[idx] == 1:
+#             true_pos += 1
+#         elif predicted_labels[idx] == 0 and gold_labels[idx] == 0:
+#             true_neg += 1
+#         elif predicted_labels[idx] == 1 and gold_labels[idx] == 0:
+#             false_pos += 1
+#         elif predicted_labels[idx] == 0 and gold_labels[idx] == 1:
+#              false_neg += 1
+
+#         idx += 1
+
+#     return (true_pos, true_neg, false_neg, false_pos)
+
+	pass
+
+# returns the calculated F1-score for the classification
+def calculate_f1(gold_labels, classified_labels):
+
+	#     values = get_pos_neg(gold_labels, classified_labels)
+#     recall_val = recall(gold_labels, classified_labels)
+#     precision_val = precision(gold_labels, classified_labels)
+#     f1 = (2*precision_val*recall_val) / (recall_val + precision_val)
+    
+#     return f1 # returns as a float
+
+	pass
 
 # returns a list of tuples, each of which is formated as (id, example_text) for test data and (id, label, example_text) for training data
 def data_tuple_pairs(file_path, is_training):
@@ -46,20 +102,15 @@ def data_tuple_pairs(file_path, is_training):
 class SentimentAnalysis():
 
 	def __init__(self):
-		self.trained_prob_pos = 0		# probability of negative classificaiton from training
-		self.trained_prob_neg = 0		# probability of positive classification from training
+		self.trained_prob_pos = {}		# probability of positive classificaiton from training
+		self.trained_prob_neg = {}		# probability of negative classification from training
 		self.class_positive_count = 0	# count of all positive instances from training
 		self.class_negative_count = 0	# count of all negative instances from training
-		self.positive_words = 0		# holds total occurances of words in positive classification
-		self.negative_words = 0		# holds total occurances of words in negative classificaiton
-		pass
-		
-
-	# expands contractions for more accurate classification (ie. dont --> do not)
-	def expand_contractions(self, contraction):
-		# look through mappings of contractions
-		# if contraction matches a mapping, return its key
-		pass
+		self.positive_words_dict = {}		# holds total occurances of words in positive classification
+		self.negative_words_dict = {}		# holds total occurances of words in negative classificaiton
+		self.total_vocab_dict = {}		# holds total occurances of all words in vocabular (positive and negative classifications)
+		self.calculated_class_positive_prob = 0		# probability of class being positive
+		self.calculated_class_negative_prob = 0		# probability of class being negative		
 
 
 	# preprocesses text data - text is the sentences from the data
@@ -111,166 +162,98 @@ class SentimentAnalysis():
 	# trains the model using the training data tupels: (text_data, label) 
 	def train_model(self, training_data):
 
-		print("\n---------------------------------------")
-		print("------------- IN TRAINING -----------------")
+		print("Conducting Training ...")
 
 		new_training_data = []
 
-		count = 0
 		for data in training_data:
-			# if count < 15:
-			# print("==================================")
-			# print("--> OLD DATA: ", data[0])
 			preprocessed_sentence = self.preprocess_data(data[0])
-			# print("----> ", preprocessed_sentence)
-			count += 1
-			# replace original training_data text_data with the new processed sentence returned from preprocess_data 
-			# print("---> NEW DATA: ", data[0])
-			# print("=====> ", preprocessed_sentence)
-			#new_training_data.append(' '.join(preprocessed_sentence))
-
-			# new_training_data = [i for lst in new_training_data for i in lst]
-
-			#print(new_training_data)
-
-
 			new_training_data.append((' '.join(preprocessed_sentence), data[1]))
-		print()
-		#print(new_training_data)
 
-
-		#         for f in features:
-#             # if positive
-#             if f[1] == "1":
-#                 self.pos += 1
-#                 if f[0] not in self.pos_count:
-#                     self.pos_count[f[0]] = 1
-#                 else:
-#                     self.pos_count[f[0]] += 1  
-#             # if negative
-#             elif f[1] == "0":
-#                 self.neg += 1
-#                 if f[0] not in self.neg_count:
-#                     self.neg_count[f[0]] = 1
-#                 else:
-#                     self.neg_count[f[0]] += 1
-
-		count = 0
 		for item in new_training_data: # new_training_data is of format: (text, label)
-			if count < 15:
-				print()
-				# handles positive features
-				if item[1] == '1':
-					self.class_positive_count += 1
-					# print("TO FEATURIZE POSITIVE: ", item[0])
-					features = self.featurize(item)
+			# handles positive features
+			if item[1] == '1':
+				self.class_positive_count += 1
+				features = self.featurize(item)
 
-					for f in features:
-						print("pos features: ", f)
-						# if word not in dictionary:
-							# add to dict with count 1 --> self.positive_words
-						# else:
-							# increase count +1 for each occurance
-						pass
+				for f in features:
+					word = f[0]
+					if word not in self.positive_words_dict:
+						self.positive_words_dict[f[0]] = 1
+					else:
+						self.positive_words_dict[f[0]] += 1
 
-					pass
+			# handles negative features
+			if item[1] == '0':
+				self.class_negative_count += 1
+				features = self.featurize(item)
 
+				for f in features:
+					if f[0] not in self.negative_words_dict:
+						self.negative_words_dict[f[0]] = 1
+					else:
+						self.negative_words_dict[f[0]] += 1
 
-				# handles negative features
-				if item[1] == '0':
-					self.class_negative_count += 1
-					# print("TO FEATURIZE NEGATIVE: ", item[0])
-					features = self.featurize(item)
+		# normalize dictinaory --> handles occurances of word appearing in one class, but not the other, which would give a zero-count for the word
+		for key, val in self.positive_words_dict.items():
+			if key not in self.negative_words_dict:
+				self.negative_words_dict[key] = 0
 
-					for f in features:
-						print("neg features: ", f)
-						# if word not in dictionary:
-							# add to dict with count 1 --> self.negative_words
-						# else:
-							# increase count +1 for each occurance
-						pass
+		for key, val in self.negative_words_dict.items():
+			if key not in self.positive_words_dict:
+				self.positive_words_dict[key] = 0
 
-					pass
+		# print("POSITIVE WORDS DICT: ", self.positive_words_dict)
+		# print()
+		# print("NEGATIVE WORDS DICT: ", self.negative_words_dict)
+		# collecting a dictionary for total vocab
+		for word in self.positive_words_dict:
+			if word not in self.total_vocab_dict:
+				self.total_vocab_dict[word] = 1
+			else:
+				self.total_vocab_dict[word] += 1
 
-				count += 1
-	# print("positive: ", self.class_positive_count)
-	# print("negative: ", self.class_negative_count)
+		for word in self.negative_words_dict:
+			if word not in self.total_vocab_dict:
+				self.total_vocab_dict[word] = 1
+			else:
+				self.total_vocab_dict[word] += 1
 
+		vals = self.total_vocab_dict.values()
+		total_vocab_count = sum(vals) # vocabulary size
 
-	# normalize positive dict
-	# for key, val in self.positive_words:
-	# 	pass
+		# print()
+		# print("TOTAL VOCAB DICT: ", self.total_vocab_dict)
+		# print()
+		# print("TOTAL VOCAB SIZE: ", total_vocab_count)
+		# print()
+		# getting probability of each word in positive class
+		for word in self.positive_words_dict:
+			prob = self.positive_words_dict[word] / self.class_positive_count
 
-	# # normalize negative dict
-	# for key, val in self.negative_words:
-	# 	pass
+			# conduct laplace smoothing
+			if prob == 0:
+				prob = (self.positive_words_dict[word] + 1) / (self.class_positive_count + total_vocab_count)
+			self.trained_prob_pos[word] = prob
+			# print("POS WORD: ", word, " POS PROB: ", prob)
 
+		# getting probability of each word in negative class
+		for word in self.negative_words_dict:
+			prob = self.negative_words_dict[word] / self.class_negative_count
 
+			# conduct laplace smoothing
+			if prob == 0:
+				prob = (self.negative_words_dict[word] + 1) / (self.class_negative_count + total_vocab_count)
+			self.trained_prob_neg[word] = prob
+			# print("NEG WORD: ", word, " NEG PROB: ", prob)
 
+		self.calculated_class_positive_prob = self.class_positive_count / (self.class_positive_count + self.class_negative_count)
+		self.calculated_class_negative_prob = self.class_negative_count / (self.class_positive_count + self.class_negative_count)
 
+		print("POSITIVE CLASS PROBABILITY IS: ", self.calculated_class_positive_prob)
+		print("NEGATIVE CLASS PROBABILITY IS: ", self.calculated_class_negative_prob)
 
-
-
-		# normalize dictinaory --> handles occurances of word appearing in one class, but not the other, which would give a zero-count for the word 
-
-		#         for key, val in self.pos_count.items():
-#             if key not in self.neg_count:
-#                 self.neg_count[key] = 0
-
-#         for key, val in self.neg_count.items():
-#             if key not in self.pos_count:
-#                 self.pos_count[key] = 0
-
-
-                    
-#         # get a total vocab
-#         for word in self.pos_count:
-#             if word not in self.total_vocab:
-#                 self.total_vocab[word] = 1
-#             else:
-#                 self.total_vocab[word] += 1
-#         for word in self.neg_count:
-#             if word not in self.total_vocab:
-#                 self.total_vocab[word] = 1
-#             else:
-#                 self.total_vocab[word] += 1
-                
-#         vals = self.total_vocab.values()
-#         total_vocab_words = sum(vals)
-        
-#         #get prob of each word in pos class
-#         for word in self.pos_count:
-#             prob = self.pos_count[word] / self.pos
-            
-#             if prob == 0:
-#                 # do laplace smoothing
-#                 prob = (self.pos_count[word] + 1) / (self.pos + total_vocab_words)
-
-#             self.positive_probs[word] = prob
-        
-#         #get prob of each word in neg class
-#         for word in self.neg_count:
-#             prob = self.neg_count[word] / self.neg
-            
-#             if prob == 0:
-#                 # do laplace smoothing
-#                 prob = (self.neg_count[word] + 1) / (self.neg + total_vocab_words)
-                
-#             self.negative_probs[word] = prob
-
-
-#         self.pos_class_prob = self.pos / (self.pos + self.neg)
-#         self.neg_class_prob = self.neg / (self.pos + self.neg)
-        
-#         print("positive class prob is: ", self.pos_class_prob)
-#         print("negative class prob is: ", self.neg_class_prob)
-
-            
-#         print("Training finished.")
-
-
-
-
+		print("Training Finished.\n")
 		return
 
 	# takes a given sentence with its label and splits it into individual words which hold an association to the sentence's given classificaiton label
@@ -318,28 +301,76 @@ class SentimentAnalysis():
 
 		return (prob_positive, prob_negative)
 
+	# classifies whether the input data is more likely to belong to the positive or negative class
+	def classify(self, data):
+
+		prob_pos, prob_neg = self.score(data)
+
+		if prob_pos > prob_neg:
+			return 1 # is a positive classification
+		else:
+			return 0 # is a negative classification
 
 
 
 if __name__ == '__main__':
 
+	# if len(sys.argv) != 3:
+		# print("Usage: python SentimentAnalysis.py <training file> <testing file>")
+		# sys.exit(1)
+
+	# training = sys.argv[1]
+	# testing_data = sys.argv[2]
+
+	print("================ running sentiment analysis ================")
+	print()
+
 	sa = SentimentAnalysis()
 
+	print("Running training model...")
 	# read data for training the model
 	training_tuples = data_tuple_pairs("./DataSets/amazon_cells_labelled.txt", True)  #("./DataSets/train.csv", True)
 	#print(training_tuples)
 
 	sa.train_model(training_tuples)
 
-	#TODO: do stuff for training model here
-
+	print()
+	print("Running classification...")
 	# read data for testing the model
-	data_tuple_pairs("./DataSets/test.csv", False)
+	data_tuples = data_tuple_pairs("./DataSets/test.csv", False)
 
-	#TODO: do stuff for testing accuracy of model here
+	# classifications = [] # will hold classified labels (labels assigned by the classifier)
+	# labels = [] # will hold gold labels (true labels)
+	# for i in data_tuples:
+	# 	labels.append(i[1])
+	# 	classifications.append(sa.classify(i))
+
+	# # calculate accuracies
+	# print()
+	# print("CLASSIFICAITON FROM FUNCTION: ", classifications) # classified labels
+	# print("CLASSIFICATION FROM FILE: ", labels) # gold labels
+
+	# print()
+	# print("Calculating F1 score...")
+	# print("F1 score: ", f1(labels, classifications))
+
+	# print()
+	# print("Generating classifications from test data...")
+	# test_data_tuples = data_tuple_pairs(testing_data)
+	# test_classificaitons = []
+	# test_labels = []
+	# for i in test_data_tuples:
+	# 	labels.append(i[1])
+	# 	test_classificaitons.append(sa.classifiy(i))
+	# print("Classifications from test data finished.")
+
+
+	# print("Sentiment analysis complete.")
 
 
 
+
+# ------ TODO ------:
 	# run sa once with 1-grams
 	# calculate accuracy
 
@@ -348,208 +379,3 @@ if __name__ == '__main__':
 
 	# run sa once with 3-grams
 	# calculate accuracy
-
-# ----------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-# import numpy as np
-# import sys
-# from collections import Counter
-# import math
-# import string
-# import re
-
-
-# # used to write classificaitons to file
-# def write_to_file(filename, labels_list, class_list):
-#     out_file = open(filename, "w")
-    
-#     return_list = []
-#     if len(labels_list) == len(class_list):
-    
-#         idx = 0
-#         while idx < len(labels_list):
-#             return_list.append((labels_list[idx], class_list[idx]))
-#             idx += 1
-
-#         for i in enumerate(return_list):
-#             output = i[1]
-#             output = (str(output[0])+ " " + str(output[1]))        
-
-#             out_file.write(output)
-#             out_file.write("\n")
-            
-#     out_file.close()
-
-
-    
-# # for the following THREE functions...
-# # classified labels is a list of strings of the labels assigned by the classifier
-# # gold labels is a list of strings of the true labels
-# # values is a return of a list in the order of (true positive, true negative, false negative, false positive)
-# def precision(gold_labels, classified_labels): 
-
-#     values = get_pos_neg(gold_labels, classified_labels) 
-#     true_pos = values[0]
-#     false_pos = values[3]
-#     precision = true_pos / (true_pos + false_pos)
-    
-#     print("Precision is: ", precision)
-#     print()
-#     return precision # returns as a float
-
-# def recall(gold_labels, classified_labels): 
-    
-#     values = get_pos_neg(gold_labels, classified_labels)
-#     true_pos = values[0]
-#     false_neg = values[2]
-#     recall = true_pos / (true_pos + false_neg)
-    
-#     print("Recall is: ", recall)
-#     return recall # returns as a float
-
-# def f1(gold_labels, classified_labels): 
-    
-#     values = get_pos_neg(gold_labels, classified_labels)
-#     recall_val = recall(gold_labels, classified_labels)
-#     precision_val = precision(gold_labels, classified_labels)
-#     f1 = (2*precision_val*recall_val) / (recall_val + precision_val)
-    
-#     return f1 # returns as a float
-
-
-# # function to get the true pos/negs and false pos/negs to use in calculations above
-# def get_pos_neg(gold_labels, predicted_labels):
-#     true_pos = 0
-#     true_neg = 0
-#     false_neg = 0
-#     false_pos = 0
-    
-#     idx = 0
-#     while idx < len(predicted_labels):
-
-#         if predicted_labels[idx] == 1 and gold_labels[idx] == 1:
-#             true_pos += 1
-#         elif predicted_labels[idx] == 0 and gold_labels[idx] == 0:
-#             true_neg += 1
-#         elif predicted_labels[idx] == 1 and gold_labels[idx] == 0:
-#             false_pos += 1
-#         elif predicted_labels[idx] == 0 and gold_labels[idx] == 1:
-#              false_neg += 1
-
-#         idx += 1
-
-#     return (true_pos, true_neg, false_neg, false_pos)
-
-
-# # F1 score should be higher
-# class SentimentAnalysisImproved:
-
-#     def __init__(self):
-#         self.true_class_dict = {} # dictinary to hold true counts
-#         self.false_class_dict = {} # dictionary to hold false counts
-#         self.pos_count = {}
-#         self.neg_count = {}
-#         self.pos = 0 # class positive count
-#         self.neg = 0 # class negative count
-#         self.pos_word_counts = 0 # count of words of positive class
-#         self.neg_word_counts = 0 # count of words of negative class
-#         self.positive_probs = {} # positive probabilities
-#         self.negative_probs = {} # negative probabilities
-#         self.total_vocab = {} # dictionary to hold total vocab
-
-
-
-#     def score(self, data):
-#         i_d = data[0]
-#         sentence = data[1]
-        
-#         data_pos = (i_d, sentence, 1)
-#         data_neg = (i_d, sentence, 0)
-        
-#         # get data in form of (word, label) for both negative and positive labels
-#         feat_pos = self.featurize(data_pos)
-#         feat_neg = self.featurize(data_neg)
-        
-#         prob_pos = self.pos_class_prob
-#         for f in feat_pos:
-#             if f[0] in self.positive_probs:
-#                 prob_word = self.positive_probs[f[0]]
-#                 prob_pos *= prob_word 
-                            
-#         prob_neg = self.neg_class_prob
-#         for f in feat_neg:
-#             if f[0] in self.negative_probs:
-#                 prob_word = self.negative_probs[f[0]]
-#                 prob_neg *= prob_word 
-
-#         return(prob_pos, prob_neg)
-
-
-#     def classify(self, data):
-#         pos_prob, neg_prob = self.score(data)
-
-#         if pos_prob > neg_prob: # is positive
-#             return 1
-#         else:
-#             return 0 # is negative
-
-
-#     def __str__(self):
-#         return "NAME FOR YOUR CLASSIFIER HERE"
-
-
-# if __name__ == "__main__":
-#     if len(sys.argv) != 3:
-#         print("Usage:", "python hw3_sentiment.py training-file.txt testing-file.txt")
-#         sys.exit(1)
-
-#     training = sys.argv[1]
-#     testing = sys.argv[2]
-
-#     print("SentimentAnalysis Complete.")
-
-
-     
-#     # ================ running improved class ================
-#     print()
-#     print("======== SentimentAnalysisImproved Class ========")
-#     sai = SentimentAnalysisImproved()
-    
-#     print()
-#     print("Runing SentimentAnalysisImproved training...")
-#     tuples_list = generate_tuples_from_file(training)
-#     sai.train(tuples_list)
-    
-#     print()
-#     print("Running SentimentAnalysisImproved classify...")
-#     print("From dev_file.txt")
-#     tuples_list = generate_tuples_from_file("dev_file.txt")
-#     classification = []
-#     files_labes = []
-#     for i in tuples_list:
-#         files_labes.append(int(i[2]))
-#         classification.append(sai.classify(i))
-        
-#     print("classification from function: ", classification) # classified labels
-#     print("classification from file:     ", files_labes) # gold labels
-    
-#     print()
-#     print("Calculating F1 score...")
-#     print("F1 score is: ", f1(files_labes, classification))
-    
-#     print()
-#     print("Generating classifications from test data...")
-#     tuples_list_test = generate_tuples_from_test(testing)
-#     test_classificaitons = []
-#     test_labels = []
-#     for i in tuples_list_test:
-#         test_labels.append(i[0])
-#         test_classificaitons.append(sa.classify(i))
-#     print("Classificaitons from test data finished.")
-    
-    
-#     print()
-#     print("SentimentAnalysisImproved Complete.")
-    
