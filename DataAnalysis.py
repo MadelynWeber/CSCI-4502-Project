@@ -1,6 +1,8 @@
 # This is where all of the data analysis will be done
 
 import pandas as pd
+from SentimentAnalysis import SentimentAnalysis
+# from TextBlob import run_textBlob
 
 if __name__ == '__main__':
 
@@ -10,19 +12,27 @@ if __name__ == '__main__':
 	# removing all unnecessary columns for processes
 	df = df[['id', 'user_location', 'date', 'text', 'hashtags']]
 
-	df.info()
-
 	# drop rows with NaN values
 	df = df.dropna(axis=0, how='any', thresh=None, subset=None, inplace=False)
 	print("new length: ", len(df))
+
+	# create new columns to hold information from classifications
+	df["SentimentAnalysis Classificaiton"] = ""
+	df["TextBlob SentimentAnalysis Classificaiton"] = ""
+
+	df.info()
 
 	# get text data from dataset
 
 	# run text data through SentimentAnalysis
 
+	
+
 	# insert column for my SA results
 
 	# insert column for TB SA results
+
+
 
 
 
