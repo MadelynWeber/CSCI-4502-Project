@@ -85,10 +85,39 @@ def data_tuple_pairs(file_path, is_training):
 	# the first line is just the tag names, so remove it
 	return (hold_returns[1:])
 
+# returns list of ngrams for each sentence 
+def get_ngrams(sentence, n):
+	print("Sentence: ", sentence)
+	is_final = False # flag to mark final tuple for ngram
+	# tokens = sentence.split()
+	hold_ngrams = []
+	for t in range(len(sentence)):
+		# print("t: ", t)
+		# appending nothing onto last element on 2-grams
+		if n == 2 and t == len(sentence)-1: 
+			# print("TEST 1")
+			ngram = sentence[t: t+n]
+			ngram = [*ngram, ' ']
+			hold_ngrams.append(tuple(ngram))
+			is_final = True
+		# appending empty character to last element on 3-gram
+		if n == 3 and t == len(sentence)-2: 
+			# print("TEST 2")
+			ngram = sentence[t: t+n]
+			ngram = [*ngram, ' ']
+			hold_ngrams.append(tuple(ngram))
+			is_final = True
+		if is_final == False:
+			# print("TEST 3")
+			ngram = sentence[t: t+n]
+			hold_ngrams.append(tuple(ngram))
+	# print("====> ngrams: ", hold_ngrams)
+	return hold_ngrams
+
 
 class SentimentAnalysis():
 
-	def __init__(self):
+	def __init__(self, n):
 		self.trained_prob_pos = {}		# probability of positive classificaiton from training
 		self.trained_prob_neg = {}		# probability of negative classification from training
 		self.class_positive_count = 0	# count of all positive instances from training
@@ -97,7 +126,8 @@ class SentimentAnalysis():
 		self.negative_words_dict = {}		# holds total occurances of words in negative classificaiton
 		self.total_vocab_dict = {}		# holds total occurances of all words in vocabular (positive and negative classifications)
 		self.calculated_class_positive_prob = 0		# probability of class being positive
-		self.calculated_class_negative_prob = 0		# probability of class being negative		
+		self.calculated_class_negative_prob = 0		# probability of class being negative
+		self.ngram = n 		# value to be used for ngram		
 
 
 	# preprocesses text data - text is the sentences from the data
@@ -157,6 +187,9 @@ class SentimentAnalysis():
 			preprocessed_sentence = self.preprocess_data(data[0])
 			new_training_data.append((' '.join(preprocessed_sentence), data[1]))
 
+
+		count = 0
+		n = 1
 		for item in new_training_data: # new_training_data is of format: (text, label)
 			# handles positive features
 			if item[1] == '1':
@@ -180,6 +213,12 @@ class SentimentAnalysis():
 						self.negative_words_dict[f[0]] = 1
 					else:
 						self.negative_words_dict[f[0]] += 1
+
+					# # split into ngrams
+					# if count != 15:
+					# 	print("----> ", n, "gram: ", f)
+					# 	count += 1
+
 
 		# normalize dictinaory --> handles occurances of word appearing in one class, but not the other, which would give a zero-count for the word
 		for key, val in self.positive_words_dict.items():
@@ -252,6 +291,14 @@ class SentimentAnalysis():
 
 		sentence = sentence.split()
 
+		# FOR TESTING BELOW
+		count = 0
+		if self.ngram != 1:
+			ngram_sentence = get_ngrams(sentence, self.ngram)
+			if count != 15:
+				print("returned ngram: ", ngram_sentence)
+				count += 1
+
 		features = []
 		for word in sentence:
 			features.append((word, label))
@@ -312,7 +359,7 @@ if __name__ == '__main__':
 	print("================ running sentiment analysis ================")
 	print()
 
-	sa = SentimentAnalysis()
+	sa = SentimentAnalysis(1)
 
 	print("Running training model...")
 	# read data for training the model

@@ -12,9 +12,12 @@ if __name__ == '__main__':
 	# removing all unnecessary columns for processes
 	df = df[['id', 'user_location', 'date', 'text', 'hashtags']]
 
+	# ONLY DROP ROWS WITH NO TEXT DATA (IF ANY)
+
+
 	# drop rows with NaN values
-	df = df.dropna(axis=0, how='any', thresh=None, subset=None, inplace=False)
-	print("new length: ", len(df))
+	# df = df.dropna(axis=0, how='any', thresh=None, subset=None, inplace=False)
+	# print("new length: ", len(df))
 
 	# create new columns to hold information from classifications
 	df["SentimentAnalysis Classificaiton"] = ""
@@ -22,11 +25,11 @@ if __name__ == '__main__':
 
 	df.info()
 
+	df.head()
+
 	# get text data from dataset
 
 	# run text data through SentimentAnalysis
-
-	
 
 	# insert column for my SA results
 
