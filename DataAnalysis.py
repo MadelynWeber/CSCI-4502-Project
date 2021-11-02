@@ -16,6 +16,14 @@ if __name__ == '__main__':
 	df = df.dropna(axis=0, how='any', thresh=None, subset=None, inplace=False)
 	print("new length: ", len(df))
 
+	# get text data from dataset
+
+	# run text data through SentimentAnalysis
+
+	# insert column for my SA results
+
+	# insert column for TB SA results
+
 
 
 
