@@ -7,6 +7,11 @@ from nltk.stem import WordNetLemmatizer
 import re
 from contractions import contractions_dict # contains a mapping of frequent contractions in English and their expanded forms
 
+# a helper function for DataAnalysis.py file --> runs through the sentiment analysis processes for each given text input
+def sentiment_analysis_helper(text):
+	# TODO
+	pass
+
 # returns the calculated precision for the classification
 def precision(gold_labels, classified_labels):
 
