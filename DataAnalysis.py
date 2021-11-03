@@ -12,12 +12,9 @@ if __name__ == '__main__':
 	# removing all unnecessary columns for processes
 	df = df[['id', 'user_location', 'date', 'text', 'hashtags']]
 
-	# ONLY DROP ROWS WITH NO TEXT DATA (IF ANY)
-
-
 	# drop rows with NaN values
-	# df = df.dropna(axis=0, how='any', thresh=None, subset=None, inplace=False)
-	# print("new length: ", len(df))
+	df = df.dropna(axis=0, how='any', thresh=None, subset=None, inplace=False)
+	print("new length: ", len(df))
 
 	# create new columns to hold information from classifications
 	df["SentimentAnalysis Classificaiton"] = ""
@@ -27,27 +24,44 @@ if __name__ == '__main__':
 
 	df.head()
 
-	# get text data from dataset
-
-	# run text data through SentimentAnalysis
-
-	# insert column for my SA results
-
-	# insert column for TB SA results
-
-
-
-
-
-
-
 	# ========= TODO =========: 
-		# run dataset through my sentiment analysis model
-		# run dataset through TextBlob's sentiment analysis model
-		# compare results
-		# vizualize:
-			# sentiment of my results compared to vaccine producer, location -- on seperate graphs
-			# sentiment of my results (positive, negative) and vaccine producer, location all on one graph
-			# sentiment of TextBlob's sentiment analysis model compared to vaccine producer, location -- on seperate graphs
-			# sentiment of TextBlob's results (positive, negative) and vaccine producer, location all on one graph
+
+		# get text data from dataset
+
+		# run text data through SentimentAnalysis
+
+		# run text data through TB Sentimetn analysis
+
+		# run hashtag data through SentimentAnalysis
+
+		# run hashtag data through TB Sentiment analysis
+
+		# insert column for my SA results for text
+
+		# insert column for TB SA results for text
+
+		# examine hashtags and any linguistic data relating to any of the listed vaccine producers
+
+		# insert columns for specified vaccine producers plus count of each time one is mentioned per row
+				# column with highest count is most likely the producer the text data is about
+				# if equal, then inconclusive or sentiment can count for both
+
+		# graph my SA results against TB SA results
+
+		# graph my SA restuls against vaccine producer 
+
+		# graph my SA results against location
+
+		# graph TB SA results against vaccine producer
+
+		# graph TB SA resutls against location
+
+		# graph my SA results, location, and vaccine producer for positive classificaiton
+
+		# graph my SA results, location, and vaccine producer for negative classificaiton
+
+		# graph TB SA results, location, and vaccine producer for positive classificaiton
+
+		# graph TB SA results, location, and vaccine producer for negative classificaiton
+
 
