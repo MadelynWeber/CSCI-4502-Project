@@ -3,37 +3,49 @@ This is a file for implementing the TextBlob sentiment analysis.
 '''
 
 from textblob import TextBlob
+import nltk
+nltk.download('punkt')
 
-# given a sentence, creates a blob to be used for further analysis work
-def createBlob(data):
-	# blob = TextBlob(<sentence>)
+class textblob_analysis():
+
+	def __init__(self):
+		pass
+
+	# preprocess the text data for classificaiton
+	def preprocess(self, text):
+		# lemmatize
+		# w = Word('running')
+		# w.lemmatize("v") ## v here represents verb
+		# >> run
+
+		# remove stop words
+		# conver to lowercase
+		# remove non-alphabetical characters
+		pass
+
+	# given some text data, creates a blob to be used for further analysis work
+	def createBlob(self, text):
+		return TextBlob(text)
+
+	# create list of n-grams for given data
+	def ngrams(self, n):
+		ngrams_list = []
+		for ngram in data.ngrams(n):
+			print(ngram)
+			ngrams_list.append(ngram)
+
+		return ngrams_list
+
+	# gets the polarity calcualtion for the given piece of data
+	def classify(self, text):
+
+		return text.sentiment.polarity
+
+
+if __name__ == '__main__':
+
 	pass
 
-# lemmatize each word
-def lemmatize(data):
-	# w = Word('running')
-	# w.lemmatize("v") ## v here represents verb
-	pass
 
-# create n-grams
-def ngrams(data, n):
-	# for ngram in blob.ngrams(2):
-	# print (ngram)
-	# >> ['Analytics', 'Vidhya']
-	# ['Vidhya', 'is']
-	# ['is', 'a']
-	# ['a', 'great']
-	# ['great', 'platform']
-	# ['platform', 'to']
-	# ['to', 'learn']
-	# ['learn', 'data']
-	# ['data', 'science']
-	pass
 
-# collect sentiment classificaiton
-def classify(data):
-	# print (blob)
-	# blob.sentiment
-	# >> Analytics Vidhya is a great platform to learn data science.
-	# Sentiment(polarity=0.8, subjectivity=0.75)
-	pass
+

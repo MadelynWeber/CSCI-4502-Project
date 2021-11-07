@@ -6,6 +6,7 @@ import nltk
 from nltk.stem import WordNetLemmatizer
 import re
 from contractions import contractions_dict # contains a mapping of frequent contractions in English and their expanded forms
+import random
 
 # a helper function for DataAnalysis.py file --> runs through the sentiment analysis processes for each given text input
 def sentiment_analysis_helper(text):
@@ -65,9 +66,9 @@ def calculate_f1(gold_labels, classified_labels):
 	return f1
 
 # returns a list of tuples, each of which is formated as (id, example_text) for test data and (id, label, example_text) for training data
-def data_tuple_pairs(file_path, is_training):
+def data_tuple_pairs(lines, is_training):
 
-	lines = open(file_path, "r").readlines()
+	# lines = open(file_path, "r").readlines()
 
 	hold_returns = []
 
@@ -314,6 +315,7 @@ class SentimentAnalysis():
 	# calculates the probability of a given piece of data to be classified as either positive or negative
 	def score(self, data):
 
+		print("data: ", data)
 		i_d = data[0]
 		text = data[2]
 
@@ -321,21 +323,26 @@ class SentimentAnalysis():
 		pos_classification = (i_d, 1, text)
 		neg_classification = (i_d, 0, text)
 
+		print("1: ", pos_classification)
+		print("2: ", neg_classification)
+
 		# for both classifications, collect features of words within text 
 		pos_features = self.featurize(pos_classification)
 		neg_features = self.featurize(neg_classification)
+		print("pos: ", pos_features)
+		print("neg: ", neg_features)
 
 		# calclulate probability of each feature being positive or negative
 		prob_positive = self.trained_prob_pos
 		for feature in pos_features:
-			if f[0] in self.pos_features:
-				word_prob = self.pos_features[f[0]]
+			if feature[0] in pos_features:
+				word_prob = pos_features[feature[0]]
 				prob_positive *= word_prob
 
 		prob_negative = self.trained_prob_neg
 		for feature in neg_features:
-			if f[0] in self.neg_features:
-				word_prob = self.neg_features[f[0]]
+			if feature[0] in neg_features:
+				word_prob = neg_features[feature[0]]
 				prob_negative *= word_prob
 
 		return (prob_positive, prob_negative)
@@ -344,6 +351,8 @@ class SentimentAnalysis():
 	def classify(self, data):
 
 		prob_pos, prob_neg = self.score(data)
+		# print("pos: ", prob_pos)
+		# print("neg: ", prob_neg)
 
 		if prob_pos > prob_neg:
 			return 1 # is a positive classification
@@ -367,22 +376,49 @@ if __name__ == '__main__':
 	sa = SentimentAnalysis(1)
 
 	print("Running training model...")
+
+	file = open("./DataSets/amazon_cells_labelled.txt", "r").readlines()
+	# do same thing with "twitter_training.csv" dataset  
+
+	data = []
+	for line in file:
+		data.append(line)
+
+	random.shuffle(data)
+
+	training_data = data[:80]
+	testing_data = data[:20]
+
+	# print("training: ", training_data)
+	# print()
+	# print()
+	# print("testing: ", testing_data)
+
+
 	# read data for training the model
-	training_tuples = data_tuple_pairs("./DataSets/amazon_cells_labelled.txt", True)  #("./DataSets/train.csv", True)
-	#print(training_tuples)
+	# training_tuples = data_tuple_pairs("./DataSets/amazon_cells_labelled.txt", True)  #("./DataSets/train.csv", True)
+	training_tuples = data_tuple_pairs(training_data, True)
+	# #print(training_tuples)
 
 	sa.train_model(training_tuples)
 
-	print()
+	# print()
 	print("Running classification...")
 	# read data for testing the model
-	data_tuples = data_tuple_pairs("./DataSets/test.csv", False)
+	testing_tuples = data_tuple_pairs(testing_data, True)
+	# data_tuples = data_tuple_pairs("./DataSets/test.csv", False)
 
-	# classifications = [] # will hold classified labels (labels assigned by the classifier)
-	# labels = [] # will hold gold labels (true labels)
+	# print(data_tuples[0])
+
+	classifications = [] # will hold classified labels (labels assigned by the classifier)
+	gold_labels = [] # will hold gold labels (true labels)
 	# for i in data_tuples:
 	# 	labels.append(i[1])
 	# 	classifications.append(sa.classify(i))
+	for data in testing_tuples:
+		# print(data[0])
+		gold_labels.append(data[1])
+		classifications.append(sa.classify(data[0]))
 
 	# # calculate accuracies
 	# print()
