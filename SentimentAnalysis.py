@@ -201,9 +201,10 @@ class SentimentAnalysis():
 			if item[1] == '1':
 				self.class_positive_count += 1
 				features = self.featurize(item)
-
+				# print("item: ", item)
 				for f in features:
 					word = f[0]
+					print(word)
 					if word not in self.positive_words_dict:
 						self.positive_words_dict[f[0]] = 1
 					else:
@@ -297,20 +298,19 @@ class SentimentAnalysis():
 
 		sentence = sentence.split()
 
-		# FOR TESTING BELOW
+		features = []
 		count = 0
 		if self.ngram != 1:
 			ngram_sentence = get_ngrams(sentence, self.ngram)
-			if count != 15:
-				print("returned ngram: ", ngram_sentence)
-				count += 1
+			for ngram in ngram_sentence:
+				features.append((ngram, label))
 
-		features = []
-		for word in sentence:
-			features.append((word, label))
+		else:
+			for word in sentence:
+				features.append((word, label))
 
+		print("returned features: ", features)
 		return features
-
 
 	# calculates the probability of a given piece of data to be classified as either positive or negative
 	def score(self, data):
@@ -373,12 +373,7 @@ if __name__ == '__main__':
 	print("================ running sentiment analysis ================")
 	print()
 
-	sa = SentimentAnalysis(1)
-
-	print("Running training model...")
-
 	file = open("./DataSets/amazon_cells_labelled.txt", "r").readlines()
-	# do same thing with "twitter_training.csv" dataset  
 
 	data = []
 	for line in file:
@@ -394,31 +389,52 @@ if __name__ == '__main__':
 	# print()
 	# print("testing: ", testing_data)
 
-
 	# read data for training the model
-	# training_tuples = data_tuple_pairs("./DataSets/amazon_cells_labelled.txt", True)  #("./DataSets/train.csv", True)
 	training_tuples = data_tuple_pairs(training_data, True)
-	# #print(training_tuples)
+	# print("input: ", training_tuples)
 
+	# testing for uni-grams
+	print("------- 1-gram test -------:")
+	sa = SentimentAnalysis(1)
+
+	print("Running training model...")
 	sa.train_model(training_tuples)
+
+	# testing for bi-grams
+	print("------- 2-gram test -------:")
+	sa = SentimentAnalysis(2)
+
+	print("Running training model...")
+	sa.train_model(training_tuples)
+
+	# testing for tri-grams
+	print("------- 3-gram test -------:")
+	sa = SentimentAnalysis(3)
+
+	print("Running training model...")
+	sa.train_model(training_tuples)
+
+	
+
+	# TODO: ---> run classification below for each 1,2, and 3-grams	
 
 	# print()
 	print("Running classification...")
 	# read data for testing the model
-	testing_tuples = data_tuple_pairs(testing_data, True)
-	# data_tuples = data_tuple_pairs("./DataSets/test.csv", False)
+	# testing_tuples = data_tuple_pairs(testing_data, True)
+	# # data_tuples = data_tuple_pairs("./DataSets/test.csv", False)
 
-	# print(data_tuples[0])
+	# # print(data_tuples[0])
 
-	classifications = [] # will hold classified labels (labels assigned by the classifier)
-	gold_labels = [] # will hold gold labels (true labels)
-	# for i in data_tuples:
-	# 	labels.append(i[1])
-	# 	classifications.append(sa.classify(i))
-	for data in testing_tuples:
-		# print(data[0])
-		gold_labels.append(data[1])
-		classifications.append(sa.classify(data[0]))
+	# classifications = [] # will hold classified labels (labels assigned by the classifier)
+	# gold_labels = [] # will hold gold labels (true labels)
+	# # for i in data_tuples:
+	# # 	labels.append(i[1])
+	# # 	classifications.append(sa.classify(i))
+	# for data in testing_tuples:
+	# 	# print(data[0])
+	# 	gold_labels.append(data[1])
+	# 	classifications.append(sa.classify(data[0]))
 
 	# # calculate accuracies
 	# print()
