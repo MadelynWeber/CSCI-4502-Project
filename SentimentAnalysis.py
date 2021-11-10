@@ -7,6 +7,7 @@ from nltk.stem import WordNetLemmatizer
 import re
 from contractions import contractions_dict # contains a mapping of frequent contractions in English and their expanded forms
 import random
+import math
 
 # a helper function for DataAnalysis.py file --> runs through the sentiment analysis processes for each given text input
 def sentiment_analysis_helper(text):
@@ -68,64 +69,51 @@ def calculate_f1(gold_labels, classified_labels):
 # returns a list of tuples, each of which is formated as (id, example_text) for test data and (id, label, example_text) for training data
 def data_tuple_pairs(lines, is_training):
 
-	# lines = open(file_path, "r").readlines()
-
 	hold_returns = []
 
 	for l in lines:
 		separate_elements = l.split('\t')
-		#print(separate_elements)
-		#i_d = separate_elements[0]
 		if (is_training):
 			label = separate_elements[1]
 			if "\n" in label:
 				label = label.strip()
 			text = separate_elements[0]
-			#hold_returns.append(tuple((i_d, label, text)))
 			hold_returns.append(tuple((text, label)))
 		else:
 			text = separate_elements[0]
 			hold_returns.append(text)
-			#hold_returns.append(tuple((i_d, text)))
 
-	# the first line is just the tag names, so remove it
-	return (hold_returns[1:])
+	return hold_returns
 
 # returns list of ngrams for each sentence 
 def get_ngrams(sentence, n):
 	print("Sentence: ", sentence)
 	is_final = False # flag to mark final tuple for ngram
-	# tokens = sentence.split()
 	hold_ngrams = []
 	for t in range(len(sentence)):
-		# print("t: ", t)
 		# appending nothing onto last element on 2-grams
 		if n == 2 and t == len(sentence)-1: 
-			# print("TEST 1")
 			ngram = sentence[t: t+n]
 			ngram = [*ngram, ' ']
 			hold_ngrams.append(tuple(ngram))
 			is_final = True
 		# appending empty character to last element on 3-gram
 		if n == 3 and t == len(sentence)-2: 
-			# print("TEST 2")
 			ngram = sentence[t: t+n]
 			ngram = [*ngram, ' ']
 			hold_ngrams.append(tuple(ngram))
 			is_final = True
 		if is_final == False:
-			# print("TEST 3")
 			ngram = sentence[t: t+n]
 			hold_ngrams.append(tuple(ngram))
-	# print("====> ngrams: ", hold_ngrams)
 	return hold_ngrams
 
 
 class SentimentAnalysis():
 
 	def __init__(self, n):
-		self.trained_prob_pos = {}		# probability of positive classificaiton from training
-		self.trained_prob_neg = {}		# probability of negative classification from training
+		self.trained_prob_pos = {}		# probability of positive classificaiton from training for each word
+		self.trained_prob_neg = {}		# probability of negative classification from training for each word
 		self.class_positive_count = 0	# count of all positive instances from training
 		self.class_negative_count = 0	# count of all negative instances from training
 		self.positive_words_dict = {}		# holds total occurances of words in positive classification
@@ -193,18 +181,15 @@ class SentimentAnalysis():
 			preprocessed_sentence = self.preprocess_data(data[0])
 			new_training_data.append((' '.join(preprocessed_sentence), data[1]))
 
-
 		count = 0
 		n = 1
 		for item in new_training_data: # new_training_data is of format: (text, label)
 			# handles positive features
 			if item[1] == '1':
 				self.class_positive_count += 1
-				features = self.featurize(item)
-				# print("item: ", item)
+				features = self.featurize(item, False)
 				for f in features:
 					word = f[0]
-					print(word)
 					if word not in self.positive_words_dict:
 						self.positive_words_dict[f[0]] = 1
 					else:
@@ -213,19 +198,13 @@ class SentimentAnalysis():
 			# handles negative features
 			if item[1] == '0':
 				self.class_negative_count += 1
-				features = self.featurize(item)
+				features = self.featurize(item, False)
 
 				for f in features:
 					if f[0] not in self.negative_words_dict:
 						self.negative_words_dict[f[0]] = 1
 					else:
 						self.negative_words_dict[f[0]] += 1
-
-					# # split into ngrams
-					# if count != 15:
-					# 	print("----> ", n, "gram: ", f)
-					# 	count += 1
-
 
 		# normalize dictinaory --> handles occurances of word appearing in one class, but not the other, which would give a zero-count for the word
 		for key, val in self.positive_words_dict.items():
@@ -236,9 +215,6 @@ class SentimentAnalysis():
 			if key not in self.positive_words_dict:
 				self.positive_words_dict[key] = 0
 
-		# print("POSITIVE WORDS DICT: ", self.positive_words_dict)
-		# print()
-		# print("NEGATIVE WORDS DICT: ", self.negative_words_dict)
 		# collecting a dictionary for total vocab
 		for word in self.positive_words_dict:
 			if word not in self.total_vocab_dict:
@@ -255,11 +231,6 @@ class SentimentAnalysis():
 		vals = self.total_vocab_dict.values()
 		total_vocab_count = sum(vals) # vocabulary size
 
-		# print()
-		# print("TOTAL VOCAB DICT: ", self.total_vocab_dict)
-		# print()
-		# print("TOTAL VOCAB SIZE: ", total_vocab_count)
-		# print()
 		# getting probability of each word in positive class
 		for word in self.positive_words_dict:
 			prob = self.positive_words_dict[word] / self.class_positive_count
@@ -268,7 +239,6 @@ class SentimentAnalysis():
 			if prob == 0:
 				prob = (self.positive_words_dict[word] + 1) / (self.class_positive_count + total_vocab_count)
 			self.trained_prob_pos[word] = prob
-			# print("POS WORD: ", word, " POS PROB: ", prob)
 
 		# getting probability of each word in negative class
 		for word in self.negative_words_dict:
@@ -278,7 +248,6 @@ class SentimentAnalysis():
 			if prob == 0:
 				prob = (self.negative_words_dict[word] + 1) / (self.class_negative_count + total_vocab_count)
 			self.trained_prob_neg[word] = prob
-			# print("NEG WORD: ", word, " NEG PROB: ", prob)
 
 		self.calculated_class_positive_prob = self.class_positive_count / (self.class_positive_count + self.class_negative_count)
 		self.calculated_class_negative_prob = self.class_negative_count / (self.class_positive_count + self.class_negative_count)
@@ -286,12 +255,12 @@ class SentimentAnalysis():
 		print("POSITIVE CLASS PROBABILITY IS: ", self.calculated_class_positive_prob)
 		print("NEGATIVE CLASS PROBABILITY IS: ", self.calculated_class_negative_prob)
 
-		print("Training Finished.\n")
+		print("\nTraining Finished.\n")
 		return
 
 	# takes a given sentence with its label and splits it into individual words which hold an association to the sentence's given classificaiton label
 	# data is of format: (text, label)
-	def featurize(self, data):
+	def featurize(self, data, isTesting):
 
 		sentence = data[0]
 		label = data[1]
@@ -309,50 +278,34 @@ class SentimentAnalysis():
 			for word in sentence:
 				features.append((word, label))
 
-		print("returned features: ", features)
 		return features
 
 	# calculates the probability of a given piece of data to be classified as either positive or negative
-	def score(self, data):
+	def score(self, text):
 
-		print("data: ", data)
-		i_d = data[0]
-		text = data[2]
+		pos_classification = (text, 1)
+		neg_classification = (text, 0)
 
-		# create an instance of the text for both a negative and positive classification
-		pos_classification = (i_d, 1, text)
-		neg_classification = (i_d, 0, text)
+		# for both classificaitons, collect features of words within text
+		pos_features = self.featurize(pos_classification, True)
+		neg_features = self.featurize(neg_classification, True)
 
-		print("1: ", pos_classification)
-		print("2: ", neg_classification)
+		probability_positive = self.calculated_class_positive_prob
+		for f in pos_features:
+			if f[0] in self.trained_prob_pos:
+				probability_positive *= self.trained_prob_pos[f[0]]
 
-		# for both classifications, collect features of words within text 
-		pos_features = self.featurize(pos_classification)
-		neg_features = self.featurize(neg_classification)
-		print("pos: ", pos_features)
-		print("neg: ", neg_features)
+		probability_negative = self.calculated_class_negative_prob
+		for f in neg_features:
+			if f[0] in self.trained_prob_neg:
+				probability_negative *= self.trained_prob_neg[f[0]]
 
-		# calclulate probability of each feature being positive or negative
-		prob_positive = self.trained_prob_pos
-		for feature in pos_features:
-			if feature[0] in pos_features:
-				word_prob = pos_features[feature[0]]
-				prob_positive *= word_prob
-
-		prob_negative = self.trained_prob_neg
-		for feature in neg_features:
-			if feature[0] in neg_features:
-				word_prob = neg_features[feature[0]]
-				prob_negative *= word_prob
-
-		return (prob_positive, prob_negative)
+		return (probability_positive, probability_negative)
 
 	# classifies whether the input data is more likely to belong to the positive or negative class
 	def classify(self, data):
 
 		prob_pos, prob_neg = self.score(data)
-		# print("pos: ", prob_pos)
-		# print("neg: ", prob_neg)
 
 		if prob_pos > prob_neg:
 			return 1 # is a positive classification
@@ -360,17 +313,9 @@ class SentimentAnalysis():
 			return 0 # is a negative classification
 
 
-
 if __name__ == '__main__':
 
-	# if len(sys.argv) != 3:
-		# print("Usage: python SentimentAnalysis.py <training file> <testing file>")
-		# sys.exit(1)
-
-	# training = sys.argv[1]
-	# testing_data = sys.argv[2]
-
-	print("================ running sentiment analysis ================")
+	print("================ running sentiment analysis ================\n")
 	print()
 
 	file = open("./DataSets/amazon_cells_labelled.txt", "r").readlines()
@@ -381,45 +326,89 @@ if __name__ == '__main__':
 
 	random.shuffle(data)
 
-	training_data = data[:80]
-	testing_data = data[:20]
-
-	# print("training: ", training_data)
-	# print()
-	# print()
-	# print("testing: ", testing_data)
+	percent_80 = len(data)*.8
+	percent_20 = len(data)*.2
+	training_data = data[:int(percent_80)]
+	testing_data = data[:int(percent_20)]
 
 	# read data for training the model
 	training_tuples = data_tuple_pairs(training_data, True)
-	# print("input: ", training_tuples)
-
+	testing_tuples = data_tuple_pairs(testing_data, True)
+	
 	# testing for uni-grams
-	print("------- 1-gram test -------:")
+	print("-------------- 1-gram test --------------:\n")
 	sa = SentimentAnalysis(1)
 
-	print("Running training model...")
+	print("Running training model for 1-grams...")
 	sa.train_model(training_tuples)
+
+	# TODO ---> NEED TO PREPROCESS TEXT DATA
+	print("\nRunning classification...\n")
+	classifications = [] 	# will hold classified labels (labels assigned by the classifier)
+	gold_labels = [] 	# will hold gold labels (true labels)
+
+	for i in testing_tuples:
+		# print("---> ", i)
+		gold_labels.append(int(i[1]))
+		classifications.append(sa.classify(i[0]))
+
+	# print("gold labels: ", gold_labels)
+	# print("classifications: ", classifications)
+
+	recall_val = recall(gold_labels, classifications)
+	precision_val = precision(gold_labels, classifications)
+	f1_val = calculate_f1(gold_labels, classifications)
+
+	print("\nRecall value: ", recall_val)
+	print("Precision value: ", precision_val)
+	print("F1-value: ", f1_val, "\n")
+
+	print("Finsihed model for 1-grams.\n")
 
 	# testing for bi-grams
-	print("------- 2-gram test -------:")
-	sa = SentimentAnalysis(2)
+	print("-------------- 2-gram test --------------:")
+	sa_2 = SentimentAnalysis(2)
 
-	print("Running training model...")
-	sa.train_model(training_tuples)
+	sa_2.train_model(training_tuples)
 
-	# testing for tri-grams
-	print("------- 3-gram test -------:")
-	sa = SentimentAnalysis(3)
+	# TODO ---> NEED TO PREPROCESS TEXT DATA
+	print("\nRunning classification...\n")
+	classifications = [] 	# will hold classified labels (labels assigned by the classifier)
+	gold_labels = [] 	# will hold gold labels (true labels)
 
-	print("Running training model...")
-	sa.train_model(training_tuples)
+	for i in testing_tuples:
+		# print("---> ", i)
+		gold_labels.append(int(i[1]))
+		classifications.append(sa_2.classify(i[0]))
+
+	# print("gold labels: ", gold_labels)
+	# print("classifications: ", classifications)
+
+	recall_val = recall(gold_labels, classifications)
+	precision_val = precision(gold_labels, classifications)
+	f1_val = calculate_f1(gold_labels, classifications)
+
+	print("\nRecall value: ", recall_val)
+	print("Precision value: ", precision_val)
+	print("F1-value: ", f1_val, "\n")
+
+	print("Finsihed model for 2-grams.\n")
+
+	# # testing for tri-grams
+	# print("-------------- 3-gram test --------------:")
+	# sa = SentimentAnalysis(3)
+
+	# print("Running training model for 3-grams...")
+	# sa.train_model(training_tuples)
+
+	# print("Finsihed model for 3-grams.\n")
 
 	
 
 	# TODO: ---> run classification below for each 1,2, and 3-grams	
 
 	# print()
-	print("Running classification...")
+	# print("Running classification...")
 	# read data for testing the model
 	# testing_tuples = data_tuple_pairs(testing_data, True)
 	# # data_tuples = data_tuple_pairs("./DataSets/test.csv", False)
