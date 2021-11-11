@@ -1,5 +1,5 @@
 """
-	This is a file for the Sentiment Analysis algorithm
+	This is a file for the Sentiment Analysis model
 """
 
 import nltk
@@ -87,7 +87,7 @@ def data_tuple_pairs(lines, is_training):
 
 # returns list of ngrams for each sentence 
 def get_ngrams(sentence, n):
-	print("Sentence: ", sentence)
+	# print("Sentence: ", sentence)
 	is_final = False # flag to mark final tuple for ngram
 	hold_ngrams = []
 	for t in range(len(sentence)):
@@ -348,12 +348,8 @@ if __name__ == '__main__':
 	gold_labels = [] 	# will hold gold labels (true labels)
 
 	for i in testing_tuples:
-		# print("---> ", i)
 		gold_labels.append(int(i[1]))
 		classifications.append(sa.classify(i[0]))
-
-	# print("gold labels: ", gold_labels)
-	# print("classifications: ", classifications)
 
 	recall_val = recall(gold_labels, classifications)
 	precision_val = precision(gold_labels, classifications)
@@ -377,9 +373,33 @@ if __name__ == '__main__':
 	gold_labels = [] 	# will hold gold labels (true labels)
 
 	for i in testing_tuples:
-		# print("---> ", i)
 		gold_labels.append(int(i[1]))
 		classifications.append(sa_2.classify(i[0]))
+
+	recall_val = recall(gold_labels, classifications)
+	precision_val = precision(gold_labels, classifications)
+	f1_val = calculate_f1(gold_labels, classifications)
+
+	print("\nRecall value: ", recall_val)
+	print("Precision value: ", precision_val)
+	print("F1-value: ", f1_val, "\n")
+
+	print("Finsihed model for 2-grams.\n")
+
+	# # testing for tri-grams
+	print("-------------- 3-gram test --------------:")
+	sa_3 = SentimentAnalysis(3)
+
+	sa_3.train_model(training_tuples)
+
+	# TODO ---> NEED TO PREPROCESS TEXT DATA
+	print("\nRunning classification...\n")
+	classifications = [] 	# will hold classified labels (labels assigned by the classifier)
+	gold_labels = [] 	# will hold gold labels (true labels)
+
+	for i in testing_tuples:
+		gold_labels.append(int(i[1]))
+		classifications.append(sa_3.classify(i[0]))
 
 	# print("gold labels: ", gold_labels)
 	# print("classifications: ", classifications)
@@ -393,16 +413,6 @@ if __name__ == '__main__':
 	print("F1-value: ", f1_val, "\n")
 
 	print("Finsihed model for 2-grams.\n")
-
-	# # testing for tri-grams
-	# print("-------------- 3-gram test --------------:")
-	# sa = SentimentAnalysis(3)
-
-	# print("Running training model for 3-grams...")
-	# sa.train_model(training_tuples)
-
-	# print("Finsihed model for 3-grams.\n")
-
 	
 
 	# TODO: ---> run classification below for each 1,2, and 3-grams	

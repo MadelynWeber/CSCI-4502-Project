@@ -4,6 +4,8 @@ import pandas as pd
 from ast import literal_eval
 from SentimentAnalysis import SentimentAnalysis
 from SentimentAnalysis import sentiment_analysis_helper
+import matplotlib.pyplot as plt
+
 # from TextBlob import run_textBlob
 
 if __name__ == '__main__':
@@ -79,42 +81,51 @@ if __name__ == '__main__':
 			df.loc[idx, "Vaccine(s) mentioned"] = ','.join(vaccines_mentioned)
 			print(df.loc[idx, "Vaccine(s) mentioned"])
 
+
+			# split text_with_hashtags into the n-gram determined to be the most accurate
+
+			# run training data into model so it has something to base itself off of
+
+			# ========= TODO =========: 
+
+
+			# run text and hashtag data through SentimentAnalysis
+			# running text data through sentiment analysis model and adding classification to dataframe column
+			# sa_classificaiton = sentiment_analysis_helper(text_with_hashtags)
+
+			# insert column for my SA results for text
+			# df.loc[idx, "SentimentAnalysis Classificaiton"] = sa_classificaiton
+
+			# run text and hashtag data through TB Sentimetn analysis
+			# running text data through TextBlob sentiment analysis model and adding classificaiton to dataframe column
+			# tb_classificaiton = run_textBlob(text_with_hashtags)
+
+			# insert column for TB SA results for text
+			# df.loc[idx, "TextBlob SentimentAnalysis Classificaiton"] = tb_classificaiton
+
 			count += 1
-
-		text_data = df.loc[idx, "text"]
-
-
-		# ========= TODO =========: 
-
-
-		# run text and hashtag data through SentimentAnalysis
-		# running text data through sentiment analysis model and adding classification to dataframe column
-		# sa_classificaiton = sentiment_analysis_helper(text_with_hashtags)
-
-		# insert column for my SA results for text
-		# df.loc[idx, "SentimentAnalysis Classificaiton"] = sa_classificaiton
-
-		# run text and hashtag data through TB Sentimetn analysis
-		# running text data through TextBlob sentiment analysis model and adding classificaiton to dataframe column
-		# tb_classificaiton = run_textBlob(text_with_hashtags)
-
-		# insert column for TB SA results for text
-		# df.loc[idx, "TextBlob SentimentAnalysis Classificaiton"] = tb_classificaiton
+		
+	# FOR TESTING ONLY!
+		# else:
+		# 	break
 
 
+	# plt.scatter(df['SentimentAnalysis Classificaiton'], df['Vaccine(s) mentioned'], color="pink")
+	# plt.show()
+	
+	# graph my SA model's results against TB SA model's results (purly for checking accuracy)
 
-		# graph my SA results against TB SA results
+	# plot density histogram for each count of each vaccine producer
 
-		# graph my SA restuls against vaccine producer 
+	# plot each vaccine against positive classifcations with a density histogram
 
-		# graph TB SA results against vaccine producer
+	# plot each vaccien against negative classifciations with a density historgram
 
-		# graph my SA results and vaccine producer for positive classificaiton
+	# (depending on how long the data spans for over time)
+		# plot positive classificaitons against time
+		# plot negative classifications against time
 
-		# graph my SA results and vaccine producer for negative classificaiton
 
-		# graph TB SA results and vaccine producer for positive classificaiton
 
-		# graph TB SA results and vaccine producer for negative classificaiton
 
 
