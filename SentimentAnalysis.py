@@ -334,20 +334,26 @@ if __name__ == '__main__':
 	# read data for training the model
 	training_tuples = data_tuple_pairs(training_data, True)
 	testing_tuples = data_tuple_pairs(testing_data, True)
+
 	
 	# testing for uni-grams
 	print("-------------- 1-gram test --------------:\n")
 	sa = SentimentAnalysis(1)
 
+	# preprocessing testing data
+	cleaned_testing_data = []
+	for data in testing_tuples:
+		preprocessed_sentence = sa.preprocess_data(data[0])
+		cleaned_testing_data.append((' '.join(preprocessed_sentence), data[1]))
+
 	print("Running training model for 1-grams...")
 	sa.train_model(training_tuples)
 
-	# TODO ---> NEED TO PREPROCESS TEXT DATA
-	print("\nRunning classification...\n")
+	print("\nRunning classification...")
 	classifications = [] 	# will hold classified labels (labels assigned by the classifier)
 	gold_labels = [] 	# will hold gold labels (true labels)
 
-	for i in testing_tuples:
+	for i in cleaned_testing_data:
 		gold_labels.append(int(i[1]))
 		classifications.append(sa.classify(i[0]))
 
@@ -367,12 +373,12 @@ if __name__ == '__main__':
 
 	sa_2.train_model(training_tuples)
 
-	# TODO ---> NEED TO PREPROCESS TEXT DATA
-	print("\nRunning classification...\n")
+	print("\nRunning classification...")
 	classifications = [] 	# will hold classified labels (labels assigned by the classifier)
 	gold_labels = [] 	# will hold gold labels (true labels)
 
-	for i in testing_tuples:
+
+	for i in cleaned_testing_data:
 		gold_labels.append(int(i[1]))
 		classifications.append(sa_2.classify(i[0]))
 
@@ -386,23 +392,19 @@ if __name__ == '__main__':
 
 	print("Finsihed model for 2-grams.\n")
 
-	# # testing for tri-grams
+	# testing for tri-grams
 	print("-------------- 3-gram test --------------:")
 	sa_3 = SentimentAnalysis(3)
 
 	sa_3.train_model(training_tuples)
 
-	# TODO ---> NEED TO PREPROCESS TEXT DATA
-	print("\nRunning classification...\n")
+	print("\nRunning classification...")
 	classifications = [] 	# will hold classified labels (labels assigned by the classifier)
 	gold_labels = [] 	# will hold gold labels (true labels)
 
-	for i in testing_tuples:
+	for i in cleaned_testing_data:
 		gold_labels.append(int(i[1]))
 		classifications.append(sa_3.classify(i[0]))
-
-	# print("gold labels: ", gold_labels)
-	# print("classifications: ", classifications)
 
 	recall_val = recall(gold_labels, classifications)
 	precision_val = precision(gold_labels, classifications)
@@ -412,60 +414,5 @@ if __name__ == '__main__':
 	print("Precision value: ", precision_val)
 	print("F1-value: ", f1_val, "\n")
 
-	print("Finsihed model for 2-grams.\n")
+	print("Finsihed model for 3-grams.\n")
 	
-
-	# TODO: ---> run classification below for each 1,2, and 3-grams	
-
-	# print()
-	# print("Running classification...")
-	# read data for testing the model
-	# testing_tuples = data_tuple_pairs(testing_data, True)
-	# # data_tuples = data_tuple_pairs("./DataSets/test.csv", False)
-
-	# # print(data_tuples[0])
-
-	# classifications = [] # will hold classified labels (labels assigned by the classifier)
-	# gold_labels = [] # will hold gold labels (true labels)
-	# # for i in data_tuples:
-	# # 	labels.append(i[1])
-	# # 	classifications.append(sa.classify(i))
-	# for data in testing_tuples:
-	# 	# print(data[0])
-	# 	gold_labels.append(data[1])
-	# 	classifications.append(sa.classify(data[0]))
-
-	# # calculate accuracies
-	# print()
-	# print("CLASSIFICAITON FROM FUNCTION: ", classifications) # classified labels
-	# print("CLASSIFICATION FROM FILE: ", labels) # gold labels
-
-	# print()
-	# print("Calculating F1 score...")
-	# print("F1 score: ", f1(labels, classifications))
-
-	# print()
-	# print("Generating classifications from test data...")
-	# test_data_tuples = data_tuple_pairs(testing_data)
-	# test_classificaitons = []
-	# test_labels = []
-	# for i in test_data_tuples:
-	# 	labels.append(i[1])
-	# 	test_classificaitons.append(sa.classifiy(i))
-	# print("Classifications from test data finished.")
-
-
-	# print("Sentiment analysis complete.")
-
-
-
-
-# ------ TODO ------:
-	# run sa once with 1-grams
-	# calculate accuracy
-
-	# run sa once with 2-grams
-	# calculate accuracy
-
-	# run sa once with 3-grams
-	# calculate accuracy
