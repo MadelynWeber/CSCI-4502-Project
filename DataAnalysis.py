@@ -4,9 +4,9 @@ import pandas as pd
 from ast import literal_eval
 from SentimentAnalysis import SentimentAnalysis
 from SentimentAnalysis import sentiment_analysis_helper
+from TextBlob import textBlob_helper
 import matplotlib.pyplot as plt
 
-# from TextBlob import run_textBlob
 
 if __name__ == '__main__':
 
@@ -28,8 +28,12 @@ if __name__ == '__main__':
 	df["Vaccine(s) mentioned"] = ""
 
 	df.info()
-
 	df.head()
+
+	# =========================== TODO ===========================:
+		# run training data through SentimentAnalysis model 
+		# figure out a way to save the dictioary created from the training data 
+	# ===============================================================
 
 	count = 0
 	for idx, row, in df.iterrows():
@@ -86,32 +90,35 @@ if __name__ == '__main__':
 
 			# run training data into model so it has something to base itself off of
 
-			# ========= TODO =========: 
+			# ==================================== TODO ====================================: 
 
 
-			# run text and hashtag data through SentimentAnalysis
-			# running text data through sentiment analysis model and adding classification to dataframe column
-			# sa_classificaiton = sentiment_analysis_helper(text_with_hashtags)
+				# run text and hashtag data through SentimentAnalysis
+				# running text data through sentiment analysis model and adding classification to dataframe column
+				# sa_classificaiton = sentiment_analysis_helper(text_with_hashtags)
 
-			# insert column for my SA results for text
-			# df.loc[idx, "SentimentAnalysis Classificaiton"] = sa_classificaiton
+				# insert column for my SA results for text
+				# df.loc[idx, "SentimentAnalysis Classificaiton"] = sa_classificaiton
 
-			# run text and hashtag data through TB Sentimetn analysis
-			# running text data through TextBlob sentiment analysis model and adding classificaiton to dataframe column
-			# tb_classificaiton = run_textBlob(text_with_hashtags)
+				# run text and hashtag data through TB Sentimetn analysis
+				# running text data through TextBlob sentiment analysis model and adding classificaiton to dataframe column
+				# tb_classificaiton = run_textBlob(text_with_hashtags)
 
-			# insert column for TB SA results for text
-			# df.loc[idx, "TextBlob SentimentAnalysis Classificaiton"] = tb_classificaiton
+				# insert column for TB SA results for text
+				# df.loc[idx, "TextBlob SentimentAnalysis Classificaiton"] = tb_classificaiton
+			# ========================================================================
 
 			count += 1
 		
 	# FOR TESTING ONLY!
-		# else:
-		# 	break
+		else:
+			break
 
+	plt.title("Test Plot")
+	plt.scatter(df['SentimentAnalysis Classificaiton'], df['Vaccine(s) mentioned'], color="pink")
+	plt.show()
 
-	# plt.scatter(df['SentimentAnalysis Classificaiton'], df['Vaccine(s) mentioned'], color="pink")
-	# plt.show()
+	# ==================================== TODO: =============================================
 	
 	# graph my SA model's results against TB SA model's results (purly for checking accuracy)
 
@@ -124,6 +131,8 @@ if __name__ == '__main__':
 	# (depending on how long the data spans for over time)
 		# plot positive classificaitons against time
 		# plot negative classifications against time
+
+	# =================================================================================
 
 
 
