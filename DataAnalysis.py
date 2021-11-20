@@ -6,6 +6,8 @@ from SentimentAnalysis import SentimentAnalysis
 from SentimentAnalysis import sentiment_analysis_helper
 from TextBlob import textBlob_helper
 import matplotlib.pyplot as plt
+import seaborn as sns
+import numpy as np
 
 
 if __name__ == '__main__':
@@ -13,8 +15,10 @@ if __name__ == '__main__':
 
 	df = pd.read_csv("./DataSets/vaccination_all_tweets.csv")
 
+	print("====> lenth: ", len(df))
+
 	# removing all unnecessary columns for processes
-	df = df[['id', 'user_location', 'date', 'text', 'hashtags']]
+	df = df[['id', 'date', 'text', 'hashtags']]
 
 	# drop rows with NaN values
 	df = df.dropna(axis=0, how='any', thresh=None, subset=None, inplace=False)
@@ -67,8 +71,8 @@ if __name__ == '__main__':
 				vaccines_mentioned.append("sinovac")
 			if("moderna" in text_with_hashtags.lower()):
 				vaccines_mentioned.append("moderna")
-			if("oxford" in text_with_hashtags.lower() or "astrazaneca" in text_with_hashtags.lower()):
-				vaccines_mentioned.append("oxford")
+			if("oxford" in text_with_hashtags.lower() or "astrazeneca" in text_with_hashtags.lower()):
+				vaccines_mentioned.append("astrazeneca")
 			if("covaxin" in text_with_hashtags.lower()):
 				vaccines_mentioned.append("covaxin")
 			if("sputnik" in text_with_hashtags.lower()):
@@ -114,9 +118,59 @@ if __name__ == '__main__':
 		else:
 			break
 
-	plt.title("Test Plot")
-	plt.scatter(df['SentimentAnalysis Classificaiton'], df['Vaccine(s) mentioned'], color="pink")
+	# plt.title("Test Plot")
+	# plt.scatter(df['SentimentAnalysis Classificaiton'], df['Vaccine(s) mentioned'], color="pink")
+	# plt.show()
+
+	contract_df = pd.read_csv("./DataSets/vaccines_by_contract.csv", sep=",")
+	country_df = pd.read_csv("./DataSets/vaccines_by_country.csv")
+
+	print("=====================:")
+	print(contract_df.head())
+	print(country_df.head())
+
+	x_1 = contract_df["vaccine"]
+	y_1 = contract_df["number"]
+
+	x_2 = country_df["vaccine"]
+	y_2 = country_df["number"]
+
+
+
+	# fig, ax = plt.subplots()
+
+
+	# ax.bar(x_1, y_1, color='purple', width=0.2, align='edge')
+	# ax.bar(x_2, y_2, color='pink', width=0.2, align='edge', alpha=0.2)
+	# plt.title("Title")
+	# plt.xlabel("X")
+	# plt.ylabel("Y")
+	# fig.tight_layout()
+
+	# plt.show()
+
+
+
+
+	x = range(7)
+	plt.subplot(2,1,1)
+	#This will create the bar graph for poulation
+	plt.bar(x_1, y_1, color='pink', width=0.2, align='edge')
+	plt.ylabel('Vaccines')
+	# plt.xticks([],[])
+	#The below code will create the second plot.
+	plt.subplot(2,1,2)
+	#This will create the bar graph for gdp i.e gdppercapita divided by population.
+	plt.bar(x_2, y_2, color='pink', width=0.2, align='edge')
+	plt.ylabel('Vaccines')
+	# plt.xticks(x, datasort['country'], rotation='vertical')
+	plt.xticks(rotation=45)
 	plt.show()
+
+
+	
+
+	
 
 	# ==================================== TODO: =============================================
 	
@@ -133,6 +187,40 @@ if __name__ == '__main__':
 		# plot negative classifications against time
 
 	# =================================================================================
+
+
+	# n_groups = 7
+
+	# contract_nums = contract_df["number"]
+	# country_nums = country_df["number"]
+
+	# fig, ax = plt.subplots()
+
+	# index = np.arange(n_groups)
+	# bar_width = 0.35
+
+	# opacity = 0.8
+	# # error_config = {'ecolor': '0.3'}
+
+	# rects1 = ax.bar(index, contract_nums, bar_width,
+ #                alpha=opacity, color='pink',
+ #                label='Count by Contract')
+
+	# rects2 = ax.bar(index + bar_width, country_nums, bar_width,
+ #                alpha=opacity, color='purple',
+ #                label='Count by Country')
+
+	# ax.set_xlabel('Vaccine')
+	# ax.set_ylabel('Doses (in hundred million)')
+	# ax.set_title('Compairson Between Vaccine Contracts and Distribution by Country')
+	# ax.set_xticks(index + bar_width / 2)
+	# ax.set_xticklabels(('Pfizer', 'AstraZeneca', 'Moderna', 'Sinovac', 'Sinopharm', 'Covaxin', 'Sputnik'))
+	# plt.xticks(rotation=45)
+
+	# ax.legend()
+
+	# fig.tight_layout()
+	# plt.show()
 
 
 

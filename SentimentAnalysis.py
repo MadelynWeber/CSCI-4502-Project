@@ -290,15 +290,19 @@ class SentimentAnalysis():
 		pos_features = self.featurize(pos_classification, True)
 		neg_features = self.featurize(neg_classification, True)
 
-		probability_positive = self.calculated_class_positive_prob
+		# probability_positive = self.calculated_class_positive_prob
+		probability_positive = 1
 		for f in pos_features:
 			if f[0] in self.trained_prob_pos:
-				probability_positive *= self.trained_prob_pos[f[0]]
+				probability_positive *= math.log(self.trained_prob_pos[f[0]])
+		probability_positive += math.log(self.calculated_class_positive_prob)
 
-		probability_negative = self.calculated_class_negative_prob
+		# probability_negative = self.calculated_class_negative_prob
+		probability_negative = 1
 		for f in neg_features:
 			if f[0] in self.trained_prob_neg:
-				probability_negative *= self.trained_prob_neg[f[0]]
+				probability_negative *= math.log(self.trained_prob_neg[f[0]])
+		probability_negative += math.log(self.calculated_class_negative_prob) # try using logs to avoid underflow
 
 		return (probability_positive, probability_negative)
 
