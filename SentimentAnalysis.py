@@ -11,7 +11,53 @@ import math
 
 # a helper function for DataAnalysis.py file --> runs through the sentiment analysis processes for each given text input
 def sentiment_analysis_helper(text):
-	# TODO
+
+
+	
+	pass
+
+# a helper function to run training for the tri-gram model (determined to be the most accurate in this case)
+def run_trigram():
+	file = open("./DataSets/amazon_cells_labelled.txt", "r").readlines()
+
+	data = []
+	for line in file:
+		data.append(line)
+
+	random.shuffle(data)
+
+	percent_80 = len(data)*.8
+	percent_20 = len(data)*.2
+	training_data = data[:int(percent_80)]
+	testing_data = data[:int(percent_20)]
+
+	# read data for training the model
+	training_tuples = data_tuple_pairs(training_data, True)
+	testing_tuples = data_tuple_pairs(testing_data, True)
+
+	# run the tri-gram model
+	sa_3 = SentimentAnalysis(3)
+
+	sa_3.train_model(training_tuples)
+
+	print("\nRunning classification...")
+	classifications = [] 	# will hold classified labels (labels assigned by the classifier)
+	gold_labels = [] 	# will hold gold labels (true labels)
+
+	for i in cleaned_testing_data:
+		gold_labels.append(int(i[1]))
+		classifications.append(sa_3.classify(i[0]))
+
+	recall_val = recall(gold_labels, classifications)
+	precision_val = precision(gold_labels, classifications)
+	f1_val = calculate_f1(gold_labels, classifications)
+
+	print("\nRecall value: ", recall_val)
+	print("Precision value: ", precision_val)
+	print("F1-value: ", f1_val, "\n")
+
+	print("Finsihed model for 3-grams.\n")
+
 	pass
 
 # returns the calculated precision for the classification

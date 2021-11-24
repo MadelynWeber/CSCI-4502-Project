@@ -3,11 +3,17 @@
 import pandas as pd
 from ast import literal_eval
 from SentimentAnalysis import SentimentAnalysis
-from SentimentAnalysis import sentiment_analysis_helper
+from SentimentAnalysis import data_tuple_pairs
+from SentimentAnalysis import run_trigram
+from SentimentAnalysis import recall
+from SentimentAnalysis import precision
+from SentimentAnalysis import calculate_f1
+from SentimentAnalysis import get_ngrams
 from TextBlob import textBlob_helper
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
+import random
 
 
 if __name__ == '__main__':
@@ -34,14 +40,54 @@ if __name__ == '__main__':
 	df.info()
 	df.head()
 
-	# =========================== TODO ===========================:
-		# run training data through SentimentAnalysis model 
-		# figure out a way to save the dictioary created from the training data 
-	# ===============================================================
+	# print("JUST ADDED FUNCTION BELOW, TEST IF WORKING!")
+	# # runs the trigram model through the SA model to get the trigram dicitonary for later classification
+	# run_trigram()
+
+	file = open("./DataSets/amazon_cells_labelled.txt", "r").readlines()
+
+	data = []
+	for line in file:
+		data.append(line)
+
+	random.shuffle(data)
+
+	percent_80 = len(data)*.8
+	percent_20 = len(data)*.2
+	training_data = data[:int(percent_80)]
+	testing_data = data[:int(percent_20)]
+
+	# read data for training the model
+	training_tuples = data_tuple_pairs(training_data, True)
+	testing_tuples = data_tuple_pairs(testing_data, True)
+
+	# run the tri-gram model
+	sa_3 = SentimentAnalysis(3)
+
+	# preprocessing testing data
+	# cleaned_testing_data = []
+	# for data in testing_tuples:
+	# 	preprocessed_sentence = sa_3.preprocess_data(data[0])
+	# 	cleaned_testing_data.append((' '.join(preprocessed_sentence), data[1]))
+
+
+	sa_3.train_model(training_tuples)
+
+	# print("\nRunning classification...")
+	# classifications = [] 	# will hold classified labels (labels assigned by the classifier)
+	# gold_labels = [] 	# will hold gold labels (true labels)
+
+	# for i in cleaned_testing_data:
+	# 	gold_labels.append(int(i[1]))
+	# 	classifications.append(sa_3.classify(i[0]))
+
+	# recall_val = recall(gold_labels, classifications)
+	# precision_val = precision(gold_labels, classifications)
+	# f1_val = calculate_f1(gold_labels, classifications)
 
 	count = 0
 	for idx, row, in df.iterrows():
-		if count != 20:
+		if count != 200:
 			print()
 			print("==============================================================================================================================")
 			# print("row: ", row)
@@ -58,7 +104,10 @@ if __name__ == '__main__':
 			print("TEXT WITH HASHTAGS: ", text_with_hashtags)
 			print("---------------------")
 			# print("Column BEFORE insertion: ", df.loc[idx, "SentimentAnalysis Classificaiton"])
-			df.loc[idx, "SentimentAnalysis Classificaiton"] = "test " + str(count)
+
+			# FOR TESTING ONLY
+			# df.loc[idx, "SentimentAnalysis Classificaiton"] = "test " + str(count)
+
 			# print("Column AFTER insertion: ", df.loc[idx, "SentimentAnalysis Classificaiton"])
 
 			vaccines_mentioned = []
@@ -91,18 +140,25 @@ if __name__ == '__main__':
 
 
 			# split text_with_hashtags into the n-gram determined to be the most accurate
+			# print("=========> type: ", type(text_with_hashtags))
+			# ngram_text = get_ngrams(text_with_hashtags, 3)
 
-			# run training data into model so it has something to base itself off of
+			# run text and hashtag data through SentimentAnalysis
+
+			# running text data through sentiment analysis model and adding classification to dataframe column
+			sa_classificaiton = sa_3.classify(text_with_hashtags)
+			# if sa_classificaiton == 1:
+				# print("Text: ", text_with_hashtags)
+				# print("Classificaiton: ", sa_classificaiton)
+				# print("-------------------------------------------------------------\n")
+
+			# insert column for my SA results for text
+			df.loc[idx, "SentimentAnalysis Classificaiton"] = sa_classificaiton
+			print(df.loc[idx, "SentimentAnalysis Classificaiton"])
+
 
 			# ==================================== TODO ====================================: 
-
-
-				# run text and hashtag data through SentimentAnalysis
-				# running text data through sentiment analysis model and adding classification to dataframe column
-				# sa_classificaiton = sentiment_analysis_helper(text_with_hashtags)
-
-				# insert column for my SA results for text
-				# df.loc[idx, "SentimentAnalysis Classificaiton"] = sa_classificaiton
+				# data put into model is not being split into n-grams before running through! 
 
 				# run text and hashtag data through TB Sentimetn analysis
 				# running text data through TextBlob sentiment analysis model and adding classificaiton to dataframe column
@@ -113,10 +169,12 @@ if __name__ == '__main__':
 			# ========================================================================
 
 			count += 1
+
 		
 	# FOR TESTING ONLY!
 		else:
 			break
+
 
 	# plt.title("Test Plot")
 	# plt.scatter(df['SentimentAnalysis Classificaiton'], df['Vaccine(s) mentioned'], color="pink")
@@ -137,35 +195,21 @@ if __name__ == '__main__':
 
 
 
-	# fig, ax = plt.subplots()
 
-
-	# ax.bar(x_1, y_1, color='purple', width=0.2, align='edge')
-	# ax.bar(x_2, y_2, color='pink', width=0.2, align='edge', alpha=0.2)
-	# plt.title("Title")
-	# plt.xlabel("X")
-	# plt.ylabel("Y")
-	# fig.tight_layout()
-
-	# plt.show()
-
-
-
-
+	# for graphing both vaccine data files -- only needed to be run once 
 	x = range(7)
-	plt.subplot(2,1,1)
-	#This will create the bar graph for poulation
-	plt.bar(x_1, y_1, color='pink', width=0.2, align='edge')
-	plt.ylabel('Vaccines')
-	# plt.xticks([],[])
-	#The below code will create the second plot.
-	plt.subplot(2,1,2)
-	#This will create the bar graph for gdp i.e gdppercapita divided by population.
-	plt.bar(x_2, y_2, color='pink', width=0.2, align='edge')
-	plt.ylabel('Vaccines')
-	# plt.xticks(x, datasort['country'], rotation='vertical')
-	plt.xticks(rotation=45)
-	plt.show()
+	# plt.subplot(2,1,1)
+	# plt.bar(x_1, y_1, color='pink', width=0.2, align='edge')
+	# plt.ylabel('Number of Doses (in hundred million)')
+	# plt.title("Vaccine Doses by Contract")
+	# plt.xlabel("Vaccines")
+
+	# plt.subplot(2,1,2)
+	# plt.bar(x_2, y_2, color='pink', width=0.2, align='edge')
+	# plt.ylabel('Number of Countries/Territories')
+	# plt.title("Number of Countries and Territories Using Each Vaccine")
+	# plt.xlabel("Vaccines")
+	# plt.show()
 
 
 	
@@ -176,15 +220,10 @@ if __name__ == '__main__':
 	
 	# graph my SA model's results against TB SA model's results (purly for checking accuracy)
 
-	# plot density histogram for each count of each vaccine producer
 
 	# plot each vaccine against positive classifcations with a density histogram
 
 	# plot each vaccien against negative classifciations with a density historgram
-
-	# (depending on how long the data spans for over time)
-		# plot positive classificaitons against time
-		# plot negative classifications against time
 
 	# =================================================================================
 
