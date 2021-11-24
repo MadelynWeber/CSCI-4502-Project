@@ -21,8 +21,6 @@ if __name__ == '__main__':
 
 	df = pd.read_csv("./DataSets/vaccination_all_tweets.csv")
 
-	print("====> lenth: ", len(df))
-
 	# removing all unnecessary columns for processes
 	df = df[['id', 'date', 'text', 'hashtags']]
 
@@ -30,19 +28,8 @@ if __name__ == '__main__':
 	df = df.dropna(axis=0, how='any', thresh=None, subset=None, inplace=False)
 	print("new length: ", len(df))
 
-	# create new columns to hold information from classifications
-	df["SentimentAnalysis Classificaiton"] = ""
-	df["TextBlob SentimentAnalysis Classificaiton"] = ""
-
-	# create new column to hold which vaccine(s) the tweet is mentioning
-	df["Vaccine(s) mentioned"] = ""
-
 	df.info()
 	df.head()
-
-	# print("JUST ADDED FUNCTION BELOW, TEST IF WORKING!")
-	# # runs the trigram model through the SA model to get the trigram dicitonary for later classification
-	# run_trigram()
 
 	file = open("./DataSets/amazon_cells_labelled.txt", "r").readlines()
 
@@ -85,77 +72,21 @@ if __name__ == '__main__':
 	# precision_val = precision(gold_labels, classifications)
 	# f1_val = calculate_f1(gold_labels, classifications)
 
+	neg_class = {}	# dictionary to hold counts of negative classifications for each vaccine
+	pos_class = {}	# dictinoary to hold counts of positive classificaitons for each vaccine
+
 	count = 0
 	for idx, row, in df.iterrows():
-		if count != 200:
-			print()
-			print("==============================================================================================================================")
-			# print("row: ", row)
-			# print("idx: ", idx)
+		if count != 2000: # ---> for testing only
+			
 			text_data = df.loc[idx, "text"]
 			hashtag_data = literal_eval(df.loc[idx, "hashtags"])
 
 			text_with_hashtags = text_data + " " + ' '.join(hashtag_data)
 
-			# print("Text data: ", text_data)
-			# print("User location: ", df.loc[idx, "user_location"])
-			# print("Tweet date: ", df.loc[idx, "date"])
-			# print("Hashtags: ", df.loc[idx, "hashtags"])
-			print("TEXT WITH HASHTAGS: ", text_with_hashtags)
-			print("---------------------")
-			# print("Column BEFORE insertion: ", df.loc[idx, "SentimentAnalysis Classificaiton"])
-
-			# FOR TESTING ONLY
-			# df.loc[idx, "SentimentAnalysis Classificaiton"] = "test " + str(count)
-
-			# print("Column AFTER insertion: ", df.loc[idx, "SentimentAnalysis Classificaiton"])
-
-			vaccines_mentioned = []
-			# check for each vaccine mentioned (vaccines include: Pfizer/BioNTech, Sinopharm, Sinovac, Moderna, Oxford/AstraZaneca, Covaxin, Sputnik V.)
-			if("pfizer" in text_with_hashtags.lower() or "biontech" in text_with_hashtags.lower()):
-				vaccines_mentioned.append("pfizer/biotech")
-			if("sinopharm" in text_with_hashtags.lower()):
-				vaccines_mentioned.append("sinopharm")
-			if("sinovac" in text_with_hashtags.lower()):
-				vaccines_mentioned.append("sinovac")
-			if("moderna" in text_with_hashtags.lower()):
-				vaccines_mentioned.append("moderna")
-			if("oxford" in text_with_hashtags.lower() or "astrazeneca" in text_with_hashtags.lower()):
-				vaccines_mentioned.append("astrazeneca")
-			if("covaxin" in text_with_hashtags.lower()):
-				vaccines_mentioned.append("covaxin")
-			if("sputnik" in text_with_hashtags.lower()):
-				vaccines_mentioned.append("sputnik")
-			if not vaccines_mentioned:
-				vaccines_mentioned.append("N/A")
-
-			# print("Vaccines: ", vaccines_mentioned)
-
-			# --> FIRST START OFF WITH THE CASES IN WHICH THEY ONLY SPEAK ABOUT ONE VACCINE PRODUCER -- IF MORE OCCUR, HANDLE THAT LATER IF THERE IS TIME
-			# insert columns for specified vaccine producers plus count of each time one is mentioned per row
-				# column with highest count is most likely the producer the text data is about
-				# if equal, then inconclusive or sentiment can count for both
-			df.loc[idx, "Vaccine(s) mentioned"] = ','.join(vaccines_mentioned)
-			print(df.loc[idx, "Vaccine(s) mentioned"])
-
-
-			# split text_with_hashtags into the n-gram determined to be the most accurate
-			# print("=========> type: ", type(text_with_hashtags))
-			# ngram_text = get_ngrams(text_with_hashtags, 3)
-
-			# run text and hashtag data through SentimentAnalysis
-
 			# running text data through sentiment analysis model and adding classification to dataframe column
 			sa_classificaiton = sa_3.classify(text_with_hashtags)
-			# if sa_classificaiton == 1:
-				# print("Text: ", text_with_hashtags)
-				# print("Classificaiton: ", sa_classificaiton)
-				# print("-------------------------------------------------------------\n")
-
-			# insert column for my SA results for text
-			df.loc[idx, "SentimentAnalysis Classificaiton"] = sa_classificaiton
-			print(df.loc[idx, "SentimentAnalysis Classificaiton"])
-
+			
 
 			# ==================================== TODO ====================================: 
 				# data put into model is not being split into n-grams before running through! 
@@ -168,6 +99,119 @@ if __name__ == '__main__':
 				# df.loc[idx, "TextBlob SentimentAnalysis Classificaiton"] = tb_classificaiton
 			# ========================================================================
 
+			# try making two dictionaries to hold each count and graph those:
+			if("pfizer" in text_with_hashtags.lower() or "biontech" in text_with_hashtags.lower()):
+				if sa_classificaiton == 0:
+					# add to neg dict
+					if "pfizer/biontech" not in neg_class:
+						neg_class["pfizer/biontech"] = 1
+					else:
+						neg_class["pfizer/biontech"] += 1
+				else:
+					# add to pos dict
+					if "pfizer/biontech" not in pos_class:
+						pos_class["pfizer/biontech"] = 1
+					else:
+						pos_class["pfizer/biontech"] += 1
+
+			if("sinopharm" in text_with_hashtags.lower()):
+				if sa_classificaiton == 0:
+					# add to neg dict
+					if "sinopharm" not in neg_class:
+						neg_class["sinopharm"] = 1
+					else:
+						neg_class["sinopharm"] += 1
+				else:
+					# add to pos dict
+					if "sinopharm" not in pos_class:
+						pos_class["sinopharm"] = 1
+					else:
+						pos_class["sinopharm"] += 1
+
+			if("sinovac" in text_with_hashtags.lower()):
+				if sa_classificaiton == 0:
+					# add to neg dict
+					if "sinovac" not in neg_class:
+						neg_class["sinovac"] = 1
+					else:
+						neg_class["sinovac"] += 1
+				else:
+					# add to pos dict
+					if "sinovac" not in pos_class:
+						pos_class["sinovac"] = 1
+					else:
+						pos_class["sinovac"] += 1
+
+			if("moderna" in text_with_hashtags.lower()):
+				if sa_classificaiton == 0:
+					# add to neg dict
+					if "moderna" not in neg_class:
+						neg_class["moderna"] = 1
+					else:
+						neg_class["moderna"] += 1
+				else:
+					# add to pos dict
+					if "moderna" not in pos_class:
+						pos_class["moderna"] = 1
+					else:
+						pos_class["moderna"] += 1
+
+			if("oxford" in text_with_hashtags.lower() or "astrazeneca" in text_with_hashtags.lower()):
+				if sa_classificaiton == 0:
+					# add to neg dict
+					if "astrazeneca" not in neg_class:
+						neg_class["astrazeneca"] = 1
+					else:
+						neg_class["astrazeneca"] += 1
+				else:
+					# add to pos dict
+					if "astrazeneca" not in pos_class:
+						pos_class["astrazeneca"] = 1
+					else:
+						pos_class["astrazeneca"] += 1
+
+			if("covaxin" in text_with_hashtags.lower()):
+				if sa_classificaiton == 0:
+					# add to neg dict
+					if "covaxin" not in neg_class:
+						neg_class["covaxin"] = 1
+					else:
+						neg_class["covaxin"] += 1
+				else:
+					# add to pos dict
+					if "covaxin" not in pos_class:
+						pos_class["covaxin"] = 1
+					else:
+						pos_class["covaxin"] += 1
+
+			if("sputnik" in text_with_hashtags.lower()):
+				if sa_classificaiton == 0:
+					# add to neg dict
+					if "sputnik" not in neg_class:
+						neg_class["sputnik"] = 1
+					else:
+						neg_class["sputnik"] += 1
+				else:
+					# add to pos dict
+					if "sputnik" not in pos_class:
+						pos_class["sputnik"] = 1
+					else:
+						pos_class["sputnik"] += 1
+
+			else:
+				if sa_classificaiton == 0:
+					# add to neg dict
+					if "N/A" not in neg_class:
+						neg_class["N/A"] = 1
+					else:
+						neg_class["N/A"] += 1
+				else:
+					# add to pos dict
+					if "N/A" not in pos_class:
+						pos_class["N/A"] = 1
+					else:
+						pos_class["N/A"] += 1
+
 			count += 1
 
 		
@@ -175,29 +219,40 @@ if __name__ == '__main__':
 		else:
 			break
 
+	df.head()
+	df.info()
 
-	# plt.title("Test Plot")
-	# plt.scatter(df['SentimentAnalysis Classificaiton'], df['Vaccine(s) mentioned'], color="pink")
+	print("==========================================")
+	print("Pos dict: ", pos_class)
+	print("Neg dict: ", neg_class)
+	print("==========================================")
+
+	# plot results for both positive and negative classifications
+	# plt.bar(neg_class.keys(), neg_class.values(), width=1.0, color='r')
+	# plt.bar(pos_class.keys(), pos_class.values(), width=1.0, color='g')
+
 	# plt.show()
-
-	contract_df = pd.read_csv("./DataSets/vaccines_by_contract.csv", sep=",")
-	country_df = pd.read_csv("./DataSets/vaccines_by_country.csv")
-
-	print("=====================:")
-	print(contract_df.head())
-	print(country_df.head())
-
-	x_1 = contract_df["vaccine"]
-	y_1 = contract_df["number"]
-
-	x_2 = country_df["vaccine"]
-	y_2 = country_df["number"]
-
 
 
 
 	# for graphing both vaccine data files -- only needed to be run once 
-	x = range(7)
+	# ========================================================================
+
+	# contract_df = pd.read_csv("./DataSets/vaccines_by_contract.csv", sep=",")
+	# country_df = pd.read_csv("./DataSets/vaccines_by_country.csv")
+
+	# print("=====================:")
+	# print(contract_df.head())
+	# print(country_df.head())
+
+	# x_1 = contract_df["vaccine"]
+	# y_1 = contract_df["number"]
+
+	# x_2 = country_df["vaccine"]
+	# y_2 = country_df["number"]
+
+	# for graphing both vaccine data files -- only needed to be run once 
+	# x = range(7)
 	# plt.subplot(2,1,1)
 	# plt.bar(x_1, y_1, color='pink', width=0.2, align='edge')
 	# plt.ylabel('Number of Doses (in hundred million)')
@@ -220,10 +275,6 @@ if __name__ == '__main__':
 	
 	# graph my SA model's results against TB SA model's results (purly for checking accuracy)
 
-
-	# plot each vaccine against positive classifcations with a density histogram
-
-	# plot each vaccien against negative classifciations with a density historgram
 
 	# =================================================================================
 
