@@ -9,56 +9,6 @@ from contractions import contractions_dict # contains a mapping of frequent cont
 import random
 import math
 
-# a helper function for DataAnalysis.py file --> runs through the sentiment analysis processes for each given text input
-def sentiment_analysis_helper(text):
-
-
-	
-	pass
-
-# a helper function to run training for the tri-gram model (determined to be the most accurate in this case)
-def run_trigram():
-	file = open("./DataSets/amazon_cells_labelled.txt", "r").readlines()
-
-	data = []
-	for line in file:
-		data.append(line)
-
-	random.shuffle(data)
-
-	percent_80 = len(data)*.8
-	percent_20 = len(data)*.2
-	training_data = data[:int(percent_80)]
-	testing_data = data[:int(percent_20)]
-
-	# read data for training the model
-	training_tuples = data_tuple_pairs(training_data, True)
-	testing_tuples = data_tuple_pairs(testing_data, True)
-
-	# run the tri-gram model
-	sa_3 = SentimentAnalysis(3)
-
-	sa_3.train_model(training_tuples)
-
-	print("\nRunning classification...")
-	classifications = [] 	# will hold classified labels (labels assigned by the classifier)
-	gold_labels = [] 	# will hold gold labels (true labels)
-
-	for i in cleaned_testing_data:
-		gold_labels.append(int(i[1]))
-		classifications.append(sa_3.classify(i[0]))
-
-	recall_val = recall(gold_labels, classifications)
-	precision_val = precision(gold_labels, classifications)
-	f1_val = calculate_f1(gold_labels, classifications)
-
-	print("\nRecall value: ", recall_val)
-	print("Precision value: ", precision_val)
-	print("F1-value: ", f1_val, "\n")
-
-	print("Finsihed model for 3-grams.\n")
-
-	pass
 
 # returns the calculated precision for the classification
 def precision(gold_labels, classified_labels):
@@ -131,24 +81,11 @@ def data_tuple_pairs(lines, is_training):
 
 	return hold_returns
 
-# returns list of ngrams for each sentence 
-def get_ngrams(sentence, n):
-	# print("Sentence: ", sentence)
+# returns list of uni-grams for each sentence 
+def get_uni_grams(sentence, n):
 	is_final = False # flag to mark final tuple for ngram
 	hold_ngrams = []
 	for t in range(len(sentence)):
-		# appending nothing onto last element on 2-grams
-		if n == 2 and t == len(sentence)-1: 
-			ngram = sentence[t: t+n]
-			ngram = [*ngram, ' ']
-			hold_ngrams.append(tuple(ngram))
-			is_final = True
-		# appending empty character to last element on 3-gram
-		if n == 3 and t == len(sentence)-2: 
-			ngram = sentence[t: t+n]
-			ngram = [*ngram, ' ']
-			hold_ngrams.append(tuple(ngram))
-			is_final = True
 		if is_final == False:
 			ngram = sentence[t: t+n]
 			hold_ngrams.append(tuple(ngram))
@@ -157,7 +94,7 @@ def get_ngrams(sentence, n):
 
 class SentimentAnalysis():
 
-	def __init__(self, n):
+	def __init__(self):
 		self.trained_prob_pos = {}		# probability of positive classificaiton from training for each word
 		self.trained_prob_neg = {}		# probability of negative classification from training for each word
 		self.class_positive_count = 0	# count of all positive instances from training
@@ -167,7 +104,6 @@ class SentimentAnalysis():
 		self.total_vocab_dict = {}		# holds total occurances of all words in vocabular (positive and negative classifications)
 		self.calculated_class_positive_prob = 0		# probability of class being positive
 		self.calculated_class_negative_prob = 0		# probability of class being negative
-		self.ngram = n 		# value to be used for ngram		
 
 
 	# preprocesses text data - text is the sentences from the data
@@ -315,60 +251,56 @@ class SentimentAnalysis():
 
 		features = []
 		count = 0
-		if self.ngram != 1:
-			ngram_sentence = get_ngrams(sentence, self.ngram)
-			for ngram in ngram_sentence:
-				features.append((ngram, label))
 
-		else:
-			for word in sentence:
-				features.append((word, label))
+		for word in sentence:
+			features.append((word, label))
 
 		return features
 
 	# calculates the probability of a given piece of data to be classified as either positive or negative
 	def score(self, text):
 
-		pos_classification = (text, 1)
-		neg_classification = (text, 0)
+		prob_pos = self.calculated_class_positive_prob
+		prob_neg = self.calculated_class_negative_prob
+		classification_val = math.log(prob_pos/prob_neg)
 
-		# for both classificaitons, collect features of words within text
-		pos_features = self.featurize(pos_classification, True)
-		neg_features = self.featurize(neg_classification, True)
+		idx = 0
+		sum_val = 0
 
-		# probability_positive = self.calculated_class_positive_prob
-		probability_positive = 1
-		for f in pos_features:
-			if f[0] in self.trained_prob_pos:
-				probability_positive *= math.log(self.trained_prob_pos[f[0]])
-		probability_positive += math.log(self.calculated_class_positive_prob)
+		text = text.split()
+		for word in text:
+			# getting P(word | positive) and P(word | negative)
+			if word in self.trained_prob_neg:
+				if word in self.trained_prob_pos:
+					sum_val += math.log(self.trained_prob_pos[word]/self.trained_prob_neg[word])
 
-		# probability_negative = self.calculated_class_negative_prob
-		probability_negative = 1
-		for f in neg_features:
-			if f[0] in self.trained_prob_neg:
-				probability_negative *= math.log(self.trained_prob_neg[f[0]])
-		probability_negative += math.log(self.calculated_class_negative_prob) # try using logs to avoid underflow
-
-		return (probability_positive, probability_negative)
+		liklihood = round(classification_val + sum_val, 2)
+		return liklihood
 
 	# classifies whether the input data is more likely to belong to the positive or negative class
 	def classify(self, data):
 
-		prob_pos, prob_neg = self.score(data)
+		liklihood = self.score(data)
 
-		if prob_pos > prob_neg:
-			return 1 # is a positive classification
-		else:
-			return 0 # is a negative classification
+		if liklihood > 0.00:
+			return 1 # positive classification
+		if liklihood < 0.00:
+			return 0 # negative classification
+		if liklihood == 0.00:
+			return -1 # neutral classification
 
 
+# main function to test SentimentAnalysis model code
 if __name__ == '__main__':
 
 	print("================ running sentiment analysis ================\n")
 	print()
 
 	file = open("./DataSets/amazon_cells_labelled.txt", "r").readlines()
+	file_2 = open("./DataSets/imdb_labelled.txt", "r").readlines()
+	file_3 = open("./DataSets/yelp_labelled.txt", "r").readlines()
+
+	file = file + file_2 + file_3
 
 	data = []
 	for line in file:
@@ -381,14 +313,17 @@ if __name__ == '__main__':
 	training_data = data[:int(percent_80)]
 	testing_data = data[:int(percent_20)]
 
+	# print("===> length of training file: ", len(training_data))
+	# print("===> length of testing file: ", len(testing_data))
+
 	# read data for training the model
 	training_tuples = data_tuple_pairs(training_data, True)
 	testing_tuples = data_tuple_pairs(testing_data, True)
 
 	
-	# testing for uni-grams
-	print("-------------- 1-gram test --------------:\n")
-	sa = SentimentAnalysis(1)
+	# running the model
+	print("-------------- Running Sentiment Analysis --------------:\n")
+	sa = SentimentAnalysis()
 
 	# preprocessing testing data
 	cleaned_testing_data = []
@@ -396,7 +331,7 @@ if __name__ == '__main__':
 		preprocessed_sentence = sa.preprocess_data(data[0])
 		cleaned_testing_data.append((' '.join(preprocessed_sentence), data[1]))
 
-	print("Running training model for 1-grams...")
+	print("Running training model...")
 	sa.train_model(training_tuples)
 
 	print("\nRunning classification...")
@@ -415,54 +350,4 @@ if __name__ == '__main__':
 	print("Precision value: ", precision_val)
 	print("F1-value: ", f1_val, "\n")
 
-	print("Finsihed model for 1-grams.\n")
-
-	# testing for bi-grams
-	print("-------------- 2-gram test --------------:")
-	sa_2 = SentimentAnalysis(2)
-
-	sa_2.train_model(training_tuples)
-
-	print("\nRunning classification...")
-	classifications = [] 	# will hold classified labels (labels assigned by the classifier)
-	gold_labels = [] 	# will hold gold labels (true labels)
-
-
-	for i in cleaned_testing_data:
-		gold_labels.append(int(i[1]))
-		classifications.append(sa_2.classify(i[0]))
-
-	recall_val = recall(gold_labels, classifications)
-	precision_val = precision(gold_labels, classifications)
-	f1_val = calculate_f1(gold_labels, classifications)
-
-	print("\nRecall value: ", recall_val)
-	print("Precision value: ", precision_val)
-	print("F1-value: ", f1_val, "\n")
-
-	print("Finsihed model for 2-grams.\n")
-
-	# testing for tri-grams
-	print("-------------- 3-gram test --------------:")
-	sa_3 = SentimentAnalysis(3)
-
-	sa_3.train_model(training_tuples)
-
-	print("\nRunning classification...")
-	classifications = [] 	# will hold classified labels (labels assigned by the classifier)
-	gold_labels = [] 	# will hold gold labels (true labels)
-
-	for i in cleaned_testing_data:
-		gold_labels.append(int(i[1]))
-		classifications.append(sa_3.classify(i[0]))
-
-	recall_val = recall(gold_labels, classifications)
-	precision_val = precision(gold_labels, classifications)
-	f1_val = calculate_f1(gold_labels, classifications)
-
-	print("\nRecall value: ", recall_val)
-	print("Precision value: ", precision_val)
-	print("F1-value: ", f1_val, "\n")
-
-	print("Finsihed model for 3-grams.\n")
-	
+	print("Finsihed running model.\n")
