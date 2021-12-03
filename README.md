@@ -1,3 +1,3 @@
 # Using Sentiment Analysis to Predict General Feelings Toward COVID-19 Vaccines
 
-## An analysis of the general opinions held toward COVID-19 vaccines and the relationship between vaccine producers, and regional and temporal data as found from COVID-19 related Tweets. 
+## An Analysis of the General Opinions Toward COVID-19 Vaccines and the Relationship Between Vaccine Producers, Region, and Temporal Data as Found From COVID-19-Related Tweets. 
