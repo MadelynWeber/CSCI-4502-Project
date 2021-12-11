@@ -12,15 +12,16 @@ It was found from the results of this analysis that the general overall sentimen
 ## Project Files:
 
 ### DataAnalysis.py 
-- This is the Analysis file
+- This is the file where all the work is done. It makes calls to the file holding the Sentiment Analysis class as well as the file holding the TextBlob Sentiment Analysis class. All classificaitons for the datafile examined are done within this file, and the histograms used for plotting the results are also created when running this file.
 
 ### SentimentAnalysis.py 
-- This is the Sentiment Analysis model 
+- This is the Sentiment Analysis model class. By running this model, the training dataset will be run through the model and an approximate estimate for the model's F1-score is calculated, as a means of measuring how accurate the model is.
 
 ### TextBlob.py
-- This is the TextBlob implementation of Sentiment Analysis
+- This is the TextBlob implementation of Sentiment Analysis. This file is very simiilar to how the SentimentAnalysis.py file runs to test the model, except it is using TextBlob's implementation of sentiment classification. This file was created as a means of checking the output of my model's classificaiotns against an already existing and accurate Sentiment Analysis model. 
 
 ## Running the Project:
+To run the project to get the results of the dataset used for analysis, the DataAnalysis.py file must be run. There is no need to run any other file wihtin this repository, as DataAnalysis.py makes calls to the other classes used for this method. Both the SentimentAnalysis.py and TextBlob.py files were created as a means of testing the individual models before implementing them in the larger project file with the Twitter dataset. 
 
 ## Future Work:
 The data examined for this analysis comes from English-speaking Twitter users, and the results were not sorted by region or location of each user. Due to the fact that some of the vaccines examined here are only avaialble in certain regions of the world, there is the potential for bias, which may throw off the accuract of the predictions made from the results of this analysis. Thus, incorporating a means of locational analysys, such that each item of text, along with its corresponding classificaiton from the model, can be sorted by geographical location. This would allow us to examine discrepancies between user location and the overall sentiment assigned to certain vaccines, leading to further potential improvments to vaccine distribution plans.
