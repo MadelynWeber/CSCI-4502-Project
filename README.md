@@ -12,6 +12,9 @@ It was found from the results of this analysis that the general overall sentimen
 ### StopWords.txt
 - This text file contains a condensed list of English stop words used for the text pre-processing phase of the model. It includes both English stop words, as well as a few added stop words specifically used on Twitter/online text, such as "user" or "lol".
 
+### amazon_cells_labelled.txt, imbd_labelled.txt, yelp_labelled.txt
+- These three files are used as a means of training the Sentiment Analysis model. They consist of a piece of text and a pre-labeled classificaion, which were combined together into one large set to be read by the model. The original datasets can be found from the [UCI Machine Learning Repository](https://archive.ics.uci.edu/ml/datasets/Sentiment+Labelled+Sentences).
+
 ## Project Files:
 
 ### DataAnalysis.py 
