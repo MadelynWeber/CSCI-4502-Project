@@ -9,6 +9,9 @@ It was found from the results of this analysis that the general overall sentimen
 
 ## Data Files:
 
+### StopWords.txt
+- This text file contains a condensed list of English stop words used for the text pre-processing phase of the model. It includes both English stop words, as well as a few added stop words specifically used on Twitter/online text, such as "user" or "lol".
+
 ## Project Files:
 
 ### DataAnalysis.py 
