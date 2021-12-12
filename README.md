@@ -15,6 +15,15 @@ It was found from the results of this analysis that the general overall sentimen
 ### amazon_cells_labelled.txt, imbd_labelled.txt, yelp_labelled.txt
 - These three files are used as a means of training the Sentiment Analysis model. They consist of a piece of text and a pre-labeled classificaion, which were combined together into one large set to be read by the model. The original datasets can be found from the [UCI Machine Learning Repository](https://archive.ics.uci.edu/ml/datasets/Sentiment+Labelled+Sentences).
 
+### vaccination_all_tweets.csv
+- This is the dataset run through the Sentiment Analysis model to collect results. After cleaning the data and removing unnecessary columns, the model had 152,229 text instances to collect data from. Each text instance fed into the model consisted of a concatenated string of the Tweet text itself and the hashtag text associated with it. The full dataset can be found from [Kaggle](https://www.kaggle.com/gpreda/all-covid19-vaccines-tweets).
+
+### vaccines_by_contract.csv
+- This is a dataset created from the information related to the number of reported dosages of different COVID-19 vaccines. The original information can be found from [Nikkei Asia](https://vdata.nikkei.com/en/newsgraphics/coronavirus-vaccine-status/). This datafile was used for an easier visualization of the current number of vaccine doses distributed amongst the vaccines examined within this analysis. 
+
+### vaccines_by_country.csv
+- This is a dataset created from the information related to the number of countries/terrirotires officially using each of the vaccines examined within this analysis. The original information can be found from [BBC News](https://www.bbc.com/news/world-56237778). Similar to the dataset above, this datafile was used for an easier visualization of the current number of vaccine doses distributed amongst the vaccines examined within this analysis, to be used as a comparison tool of the results.
+
 ## Project Files:
 
 ### DataAnalysis.py 
