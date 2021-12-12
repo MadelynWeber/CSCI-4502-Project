@@ -36,6 +36,9 @@ It was found from the results of this analysis that the general overall sentimen
 ### TextBlob.py
 - This is the TextBlob implementation of Sentiment Analysis. This file is very similar to how the SentimentAnalysis.py file runs to test the model, except it is using TextBlob's implementation of sentiment classification. This file was created as a means of checking the output of my model's classifications against an already existing and accurate Sentiment Analysis model. This file will not work if run on its own, it is written to work when called from the DataAnalysis.py file.
 
+### Contractions.py
+- This is a file holding the class for all English contractions, which is used in the text pre-processing phase within the model.
+
 ## Running the Project:
 To run the project to get the results of the dataset used for analysis, the DataAnalysis.py file must be run. There is no need to run any other file within this repository, as DataAnalysis.py makes calls to the other classes used for this method. Both the SentimentAnalysis.py and TextBlob.py files were created as a means of testing the individual models before implementing them in the larger project file with the Twitter dataset. 
 
