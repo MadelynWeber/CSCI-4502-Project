@@ -32,7 +32,6 @@ def textBlob_helper(text):
 		if result == 0.0:
 			return -1 # this will be the neutual measure
 
-
 	return result
 
 class textblob_analysis():
@@ -67,7 +66,7 @@ class textblob_analysis():
 		# expanding contractions
 		new_cleaned_list = []
 		for word in cleaned_list:
-			expansion = []
+			# expansion = []
 			if word in contractions_dict:
 				word = contractions_dict[word]
 				new_words = word.split()
@@ -108,29 +107,29 @@ class textblob_analysis():
 
 
 # main function to test the textblob analysis code
-if __name__ == '__main__':
+# if __name__ == '__main__':
 
-	print("================ running TextBlob sentiment analysis ================\n")
-	print()
+# 	print("================ running TextBlob sentiment analysis ================\n")
+# 	print()
 
-	# open this file for testing only
-	file = open("./DataSets/amazon_cells_labelled.txt", "r").readlines()
+# 	# open this file for testing only
+# 	file = open("./DataSets/amazon_cells_labelled.txt", "r").readlines()
 
-	data = []
-	for line in file:
-		split_str = line.split('\t')
-		data.append(split_str[0])
+# 	data = []
+# 	for line in file:
+# 		split_str = line.split('\t')
+# 		data.append(split_str[0])
 
 
-	# testing TextBlob model
-	tb = textblob_analysis()
+# 	# testing TextBlob model
+# 	tb = textblob_analysis()
 
-	# preprocess test data
-	processed_data = tb.preprocess(data)
+# 	# preprocess test data
+# 	processed_data = tb.preprocess(data)
 
-	for item in processed_data:
-		sentence = ' '.join(item)
-		blob = TextBlob(sentence)
-		classification = tb.classify(blob)
-		print(classification)
+# 	for item in processed_data:
+# 		sentence = ' '.join(item)
+# 		blob = TextBlob(sentence)
+# 		classification = tb.classify(blob)
+# 		print(classification)
 	
